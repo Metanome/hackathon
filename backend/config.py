@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     gemini_api_key: str
     default_model: str = "gemini-2.5-flash"
     database_path: str = "./esnaf.db"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

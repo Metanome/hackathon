@@ -1,5 +1,6 @@
 import json
 import re
+from functools import lru_cache
 
 from google import genai
 from google.genai import types
@@ -7,6 +8,7 @@ from google.genai import types
 from config import get_settings
 
 
+@lru_cache(maxsize=1)
 def _get_client() -> genai.Client:
     return genai.Client(api_key=get_settings().gemini_api_key)
 
@@ -24,9 +26,7 @@ def _parse_json_response(text: str) -> dict:
 
 
 def generate_text(prompt: str, model: str | None = None) -> str:
-    """Simple text-only generation."""
-    client = _get_client()
-    response = client.models.generate_content(
+    response = _get_client().models.generate_content(
         model=model or _get_model(),
         contents=prompt,
     )
@@ -34,16 +34,12 @@ def generate_text(prompt: str, model: str | None = None) -> str:
 
 
 def generate_json(prompt: str, model: str | None = None) -> dict:
-    """Text-only generation that parses and returns a JSON dict."""
-    text = generate_text(prompt, model)
-    return _parse_json_response(text)
+    return _parse_json_response(generate_text(prompt, model))
 
 
 def generate_from_image(image_bytes: bytes, mime_type: str, prompt: str, model: str | None = None) -> dict:
-    """Multimodal generation with an image, returns parsed JSON dict."""
-    client = _get_client()
     image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
-    response = client.models.generate_content(
+    response = _get_client().models.generate_content(
         model=model or _get_model(),
         contents=[image_part, prompt],
     )
@@ -51,10 +47,8 @@ def generate_from_image(image_bytes: bytes, mime_type: str, prompt: str, model: 
 
 
 def generate_from_audio(audio_bytes: bytes, mime_type: str, prompt: str, model: str | None = None) -> dict:
-    """Multimodal generation with audio, returns parsed JSON dict."""
-    client = _get_client()
     audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
-    response = client.models.generate_content(
+    response = _get_client().models.generate_content(
         model=model or _get_model(),
         contents=[audio_part, prompt],
     )
