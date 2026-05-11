@@ -49,21 +49,21 @@ def process_order_slip(
                 product_id=new_prod.id,
                 message=f"New product '{item.product_name}' was auto-added from an order. Please configure pricing and SKU."
             ))
-            actions.append(f"✨ Auto-created missing product: '{item.product_name}'")
+            actions.append(f"[info] Auto-created missing product: '{item.product_name}'")
         else:
             product = matches[0]
 
         if product.stock_quantity < item.quantity:
             actions.append(
-                f"⚠️ Insufficient stock for {product.name}: need {item.quantity}, have {product.stock_quantity} — skipped deduction"
+                f"[warn] Insufficient stock for {product.name}: need {item.quantity}, have {product.stock_quantity} — skipped deduction"
             )
         else:
             product_repo.update_stock(product.id, -item.quantity)
-            actions.append(f"✅ Deducted {item.quantity}× {product.name} from stock")
+            actions.append(f"[ok] Deducted {item.quantity}× {product.name} from stock")
 
         order_items.append({"product_id": product.id, "quantity": item.quantity})
         sync_alert(conn, product.id)
-        actions.append(f"🔔 Alert synced for {product.name}")
+        actions.append(f"[alert] Alert synced for {product.name}")
 
     if order_items:
         order_repo.create(OrderCreate(
@@ -71,7 +71,7 @@ def process_order_slip(
             source="image_order",
             items=order_items,
         ))
-        actions.append(f"📦 Order created for customer: {extraction.customer_name}")
+        actions.append(f"[ok] Order created for customer: {extraction.customer_name}")
 
     context = (
         f"Input type: handwritten order slip. "
@@ -118,14 +118,14 @@ def process_shelf_scan(
 
         if product_id:
             sync_alert(conn, product_id)
-            actions.append(f"🔔 Alert synced for '{product_display}' via shelf scan")
+            actions.append(f"[alert] Alert synced for '{product_display}' via shelf scan")
         else:
             alert_repo.create(AlertCreate(
                 type="critical_stock" if detected.status == "critical" else "low_stock",
                 product_id=None,
                 message=f"Shelf scan detected unknown product '{detected.name}' as {detected.status}.",
             ))
-            actions.append(f"🔔 Alert: '{detected.name}' appears {detected.status} on shelf")
+            actions.append(f"[alert] Alert: '{detected.name}' appears {detected.status} on shelf")
 
     context = (
         f"Input type: shelf scan. "

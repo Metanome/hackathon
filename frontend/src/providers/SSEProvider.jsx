@@ -16,7 +16,7 @@ export function SSEProvider({ children }) {
 
     eventSource.onmessage = (event) => {
       if (event.data === 'update') {
-        console.log('🔄 Received invalidation event from backend')
+        console.log('[SSE] Received invalidation event from backend')
         setLastUpdate(Date.now())
       }
     }

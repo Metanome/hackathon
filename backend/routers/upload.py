@@ -78,7 +78,7 @@ async def upload_audio(
     audio_bytes = await file.read()
     intent_result = voice_agent.process_audio(audio_bytes, file.content_type)
 
-    actions: list[str] = [f"🎙️ Transcribed: \"{intent_result.original_transcription}\""]
+    actions: list[str] = [f"[mic] Transcribed: \"{intent_result.original_transcription}\""]
     alerts_created = 0
 
     product_repo = ProductRepository(conn)
@@ -105,16 +105,16 @@ async def upload_audio(
                     product_id=new_prod.id,
                     message=f"New product '{product_name}' was auto-added from a voice note. Please configure pricing and SKU."
                 ))
-                actions.append(f"✨ Auto-created missing product: '{product_name}'")
+                actions.append(f"[info] Auto-created missing product: '{product_name}'")
                 alerts_created += 1
             else:
                 product = matches[0]
 
             if product.stock_quantity < quantity:
-                actions.append(f"⚠️ Insufficient stock for {product.name}: need {quantity}, have {product.stock_quantity} — skipped deduction")
+                actions.append(f"[warn] Insufficient stock for {product.name}: need {quantity}, have {product.stock_quantity} — skipped deduction")
             else:
                 product_repo.update_stock(product.id, -quantity)
-                actions.append(f"✅ Deducted {quantity}× {product.name} from stock")
+                actions.append(f"[ok] Deducted {quantity}× {product.name} from stock")
             conn.commit() # Commit before background task
             background_tasks.add_task(check_and_alert_stock, product.id)
             
@@ -125,7 +125,7 @@ async def upload_audio(
                     items=[{"product_id": product.id, "quantity": quantity}],
                 )
             )
-            actions.append(f"✅ Order created: {quantity}× {product.name} for {customer}")
+            actions.append(f"[ok] Order created: {quantity}× {product.name} for {customer}")
 
     elif intent_result.intent == "update_stock":
         product_name = intent_result.entities.get("product_name")
@@ -136,9 +136,9 @@ async def upload_audio(
                 product_repo.update_stock(matches[0].id, quantity)
                 conn.commit() # Commit before background task
                 background_tasks.add_task(check_and_alert_stock, matches[0].id)
-                actions.append(f"✅ Stock updated: +{quantity} {matches[0].name}")
+                actions.append(f"[ok] Stock updated: +{quantity} {matches[0].name}")
             else:
-                actions.append(f"⚠️ Product '{product_name}' not found")
+                actions.append(f"[warn] Product '{product_name}' not found")
 
     elif intent_result.intent == "query_stock":
         product_name = intent_result.entities.get("product_name")
@@ -146,9 +146,9 @@ async def upload_audio(
             matches = product_repo.search_by_name(product_name)
             if matches:
                 p = matches[0]
-                actions.append(f"📊 {p.name}: {p.stock_quantity} units in stock ({p.status})")
+                actions.append(f"[info] {p.name}: {p.stock_quantity} units in stock ({p.status})")
             else:
-                actions.append(f"⚠️ Product '{product_name}' not found")
+                actions.append(f"[warn] Product '{product_name}' not found")
 
     context = (
         f"Input type: voice note. "
