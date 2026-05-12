@@ -12,18 +12,17 @@ import { ROUTES } from './constants'
 import { SSEProvider } from './providers/SSEProvider'
 import { ToastProvider } from './providers/ToastProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
-import AccessibilityBar from './components/AccessibilityBar'
+import { ProfileProvider, useProfile } from './providers/ProfileProvider'
+import SetupModal from './components/SetupModal'
 
-export default function App() {
+function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { needsSetup, loading } = useProfile()
 
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <SSEProvider>
-          <ToastProvider>
-            <AccessibilityBar />
-            <div className="flex min-h-screen" style={{ background: 'var(--bg-base)' }}>
+    <>
+      {!loading && needsSetup && <SetupModal />}
+      <div className="flex min-h-screen" style={{ background: 'var(--bg-base)' }}>
               <Navbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
               <div className="flex-1 md:ml-56 flex flex-col min-w-0">
                 <Header onMenuClick={() => setSidebarOpen(true)} />
@@ -39,6 +38,19 @@ export default function App() {
                 <Footer />
               </div>
             </div>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ThemeProvider>
+        <SSEProvider>
+          <ToastProvider>
+            <ProfileProvider>
+              <AppShell />
+            </ProfileProvider>
           </ToastProvider>
         </SSEProvider>
       </ThemeProvider>

@@ -6,7 +6,9 @@ import { useToast } from '../providers/ToastProvider'
 import { useTheme } from '../providers/ThemeProvider'
 import { T } from '../constants'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { EditIcon, SettingsIcon, TrashIcon, CheckIcon, XIcon, UploadIcon, PlusIcon } from '../components/Icons'
+import { EditIcon, SettingsIcon, TrashIcon, CheckIcon, XIcon, UploadIcon, PlusIcon, PackageIcon } from '../components/Icons'
+import SkeletonCard from '../components/SkeletonCard'
+import EmptyState from '../components/EmptyState'
 
 export default function Inventory() {
   const { products, loading, error, patch, create, upload, remove } = useInventory()
@@ -47,8 +49,12 @@ export default function Inventory() {
 
   const filterLabels = { all: t.all, critical: t.filterCritical, low: t.filterLow, ok: t.filterNormal }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
-  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</div>
+  if (loading) return (
+    <div className="space-y-3">
+      <SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard />
+    </div>
+  )
+  if (error) return <div className="text-sm" style={{ color: 'var(--danger)' }}>{t.error}: {error}</div>
 
   return (
     <div className="space-y-6">
@@ -96,6 +102,19 @@ export default function Inventory() {
         </div>
       </div>
 
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<PackageIcon size={48} />}
+          title={q ? t.noSearchResults : t.noProducts}
+          description={q ? t.noSearchResultsDesc : t.noProductsDesc}
+          action={!q && (
+            <button onClick={() => { setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', supplierName: '', supplierEmail: '' }); setShowModal(true) }}
+              className="btn-primary flex items-center gap-2">
+              <PlusIcon size={16} />{t.addProduct}
+            </button>
+          )}
+        />
+      ) : (
       <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -147,7 +166,7 @@ export default function Inventory() {
                           <SettingsIcon />
                         </button>
                         <button onClick={() => setConfirmDelete({ id: p.id, name: p.name })}
-                          className="p-1.5 rounded transition-colors" style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>
+                          className="p-1.5 rounded transition-colors" style={{ background: 'color-mix(in srgb, var(--danger) 10%, transparent)', color: 'var(--danger)' }}>
                           <TrashIcon />
                         </button>
                       </div>
@@ -159,6 +178,7 @@ export default function Inventory() {
           </table>
         </div>
       </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>

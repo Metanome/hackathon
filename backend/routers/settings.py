@@ -10,7 +10,7 @@ from repositories.agent_log_repository import AgentLogRepository
 from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
 from schemas.agent import AgentActionLog
-from schemas.settings import AVAILABLE_MODELS, SettingsResponse, SettingsUpdate
+from schemas.settings import AVAILABLE_MODELS, SettingsResponse, SettingsUpdate, ProfileResponse, ProfileUpdate
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -60,6 +60,33 @@ def update_settings(data: SettingsUpdate) -> SettingsResponse:
     clear_client_cache()
 
     return get_settings_endpoint()
+
+
+@router.get("/profile", response_model=ProfileResponse)
+def get_profile(conn: sqlite3.Connection = Depends(db_dependency)) -> ProfileResponse:
+    row = conn.execute("SELECT display_name, store_name FROM profile WHERE id = 1").fetchone()
+    if not row:
+        return ProfileResponse(display_name="", store_name="")
+    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"])
+
+
+@router.put("/profile", response_model=ProfileResponse)
+def update_profile(
+    data: ProfileUpdate,
+    conn: sqlite3.Connection = Depends(db_dependency),
+) -> ProfileResponse:
+    conn.execute(
+        """
+        UPDATE profile
+        SET display_name = COALESCE(?, display_name),
+            store_name   = COALESCE(?, store_name),
+            updated_at   = datetime('now')
+        WHERE id = 1
+        """,
+        (data.display_name, data.store_name),
+    )
+    row = conn.execute("SELECT display_name, store_name FROM profile WHERE id = 1").fetchone()
+    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"])
 
 
 @router.get("/dashboard-summary")

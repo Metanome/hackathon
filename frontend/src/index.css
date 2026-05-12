@@ -31,6 +31,9 @@
   --accent: #14b8a6;
   --accent-hover: #0d9488;
   --font-size-base: 16px;
+  --danger: #f87171;
+  --success: #4ade80;
+  --warning: #fbbf24;
 }
 
 [data-theme="light"] {
@@ -43,6 +46,9 @@
   --text-muted: #9B8E7A;
   --accent: #3B6D11;
   --accent-hover: #639922;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
 }
 
 [data-fontsize="md"] { --font-size-base: 16px; }
@@ -58,6 +64,8 @@ html {
 }
 body { min-height: 100vh; }
 * { border-color: var(--border-color); }
+button:not(:disabled) { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 
 @layer components {
   .card {

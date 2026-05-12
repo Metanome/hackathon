@@ -83,7 +83,7 @@ export default function Settings() {
           </p>
         </div>
 
-        {error && <p className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--danger)' }}>{t.error}: {error}</p>}
 
         <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={handleSave} disabled={saving}>
           {saving
@@ -100,7 +100,7 @@ export default function Settings() {
       </div>
 
       <div className="mt-8 pt-8" style={{ borderTop: '1px solid var(--border-color)' }}>
-        <h2 className="text-xl font-bold mb-2" style={{ color: '#f87171' }}>
+        <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--danger)' }}>
           {t.dangerZone}
         </h2>
         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
@@ -108,7 +108,7 @@ export default function Settings() {
         </p>
         <button
           className="btn-ghost flex items-center gap-2 py-2 px-4 transition-colors"
-          style={{ color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}
+          style={{ color: 'var(--danger)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)' }}
           disabled={resetting}
           onClick={() => setConfirmReset(true)}
         >

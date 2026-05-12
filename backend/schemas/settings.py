@@ -21,3 +21,13 @@ class SettingsResponse(BaseModel):
 class SettingsUpdate(BaseModel):
     default_model: str | None = None
     gemini_api_key: str | None = None
+
+
+class ProfileResponse(BaseModel):
+    display_name: str
+    store_name: str
+
+
+class ProfileUpdate(BaseModel):
+    display_name: str | None = None
+    store_name: str | None = None

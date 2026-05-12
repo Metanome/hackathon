@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ALERT_TYPE_LABELS } from '../constants'
+import { T } from '../constants'
 import { useTheme } from '../providers/ThemeProvider'
 import { MailIcon, XIcon, CheckCircleIcon } from './Icons'
 
@@ -7,6 +7,7 @@ export default function AlertCard({ alert, onResolve }) {
   const [showEmail, setShowEmail] = useState(false)
   const [resolving, setResolving] = useState(false)
   const { lang } = useTheme()
+  const t = T[lang]
   const isCritical = alert.type === 'critical_stock'
 
   const handleResolve = async () => {
@@ -20,7 +21,7 @@ export default function AlertCard({ alert, onResolve }) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className={`badge ${isCritical ? 'badge-critical' : 'badge-low'}`}>
-              {ALERT_TYPE_LABELS[alert.type]}
+              {t.alertTypeLabels[alert.type]}
             </span>
             {alert.product_name && (
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{alert.product_name}</span>
@@ -36,20 +37,20 @@ export default function AlertCard({ alert, onResolve }) {
             <button className="btn-ghost flex items-center gap-1.5" style={{ color: 'var(--accent)' }}
               onClick={() => setShowEmail(v => !v)}>
               <MailIcon size={14} />
-              {showEmail ? (lang === 'tr' ? 'Gizle' : 'Hide') : (lang === 'tr' ? 'E-posta' : 'Email')}
+              {showEmail ? t.hide : t.email}
             </button>
           )}
           <button className="btn-ghost disabled:opacity-40 flex items-center gap-1.5"
-            style={{ color: '#4ade80' }}
+            style={{ color: 'var(--success)' }}
             onClick={handleResolve} disabled={resolving}>
-            {resolving ? '...' : <><CheckCircleIcon size={14} /> {lang === 'tr' ? 'Kapat' : 'Dismiss'}</>}
+            {resolving ? '...' : <><CheckCircleIcon size={14} /> {t.dismiss}</>}
           </button>
         </div>
       </div>
       {showEmail && alert.draft_email && (
         <div className="mt-3 p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}>
           <div className="text-xs font-semibold mb-2" style={{ color: 'var(--accent)' }}>
-            {lang === 'tr' ? 'Tedarikçi E-posta Taslağı' : 'Draft Supplier Email'}
+            {t.supplierEmailDraft}
           </div>
           <pre className="text-xs whitespace-pre-wrap font-sans" style={{ color: 'var(--text-secondary)' }}>{alert.draft_email}</pre>
         </div>

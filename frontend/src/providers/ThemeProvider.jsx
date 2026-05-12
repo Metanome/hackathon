@@ -4,7 +4,12 @@ const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('et-theme') || 'dark')
-  const [lang, setLang] = useState(() => localStorage.getItem('et-lang') || 'tr')
+  const [lang, setLang] = useState(() => {
+    const saved = localStorage.getItem('et-lang')
+    if (saved) return saved
+    const browser = (navigator.language || navigator.languages?.[0] || '').toLowerCase()
+    return browser.startsWith('tr') ? 'tr' : 'en'
+  })
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('et-fontsize') || 'md')
 
   useEffect(() => {

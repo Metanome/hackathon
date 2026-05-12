@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import { ROUTES, T } from '../constants'
 import { useTheme } from '../providers/ThemeProvider'
+import { useProfile } from '../providers/ProfileProvider'
 import { LayoutDashboardIcon, UploadIcon, PackageIcon, ShoppingCartIcon, SettingsIcon, XIcon } from './Icons'
 
 export default function Navbar({ isOpen, onClose }) {
   const { lang } = useTheme()
   const t = T[lang]
+  const { profile } = useProfile()
 
   const links = [
     { to: ROUTES.DASHBOARD, label: t.dashboard, icon: <LayoutDashboardIcon size={18} /> },
@@ -51,7 +53,7 @@ export default function Navbar({ isOpen, onClose }) {
                   `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive ? 'nav-active' : 'nav-inactive'}`
                 }
                 style={({ isActive }) => isActive
-                  ? { background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }
+                  ? { background: 'color-mix(in srgb, var(--accent) 18%, transparent)', color: 'var(--accent)', border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)', boxShadow: 'inset 3px 0 0 var(--accent)', fontWeight: 600 }
                   : { color: 'var(--text-secondary)', border: '1px solid transparent' }
                 }
               >
@@ -63,7 +65,7 @@ export default function Navbar({ isOpen, onClose }) {
         </ul>
 
         <div className="px-5 py-4" style={{ borderTop: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '12px' }}>
-          Anadolu Doğal Kooperatifi
+          {profile.store_name || 'Esnaf Tezgahı'}
         </div>
       </nav>
     </>

@@ -23,6 +23,10 @@ router = APIRouter(prefix="/api/upload", tags=["upload"])
 _SUPPORTED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 _SUPPORTED_AUDIO_TYPES = {"audio/wav", "audio/mpeg", "audio/mp4", "audio/ogg", "audio/webm"}
 
+def _base_mime(content_type: str) -> str:
+    """Strip codec parameters, e.g. 'audio/webm;codecs=opus' -> 'audio/webm'."""
+    return content_type.split(";")[0].strip()
+
 
 @router.post("/image", response_model=UploadResult)
 async def upload_image(
@@ -69,14 +73,15 @@ async def upload_audio(
     file: UploadFile = File(...),
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> UploadResult:
-    if file.content_type not in _SUPPORTED_AUDIO_TYPES:
+    mime = _base_mime(file.content_type or "")
+    if mime not in _SUPPORTED_AUDIO_TYPES:
         raise HTTPException(
             status_code=415,
             detail=f"Unsupported audio type: {file.content_type}.",
         )
 
     audio_bytes = await file.read()
-    intent_result = voice_agent.process_audio(audio_bytes, file.content_type)
+    intent_result = voice_agent.process_audio(audio_bytes, mime)
 
     actions: list[str] = [f"[mic] Transcribed: \"{intent_result.original_transcription}\""]
     alerts_created = 0

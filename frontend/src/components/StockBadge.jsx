@@ -1,5 +1,6 @@
-import { STOCK_STATUS_LABELS } from '../constants'
+import { T } from '../constants'
 import { CheckCircle2Icon, AlertTriangleIcon, AlertCircleIcon } from './Icons'
+import { useTheme } from '../providers/ThemeProvider'
 
 const classMap = {
   ok: 'badge badge-ok',
@@ -8,10 +9,12 @@ const classMap = {
 }
 
 export default function StockBadge({ status }) {
+  const { lang } = useTheme()
+  const t = T[lang]
   return (
-    <span className={classMap[status] ?? 'badge bg-slate-700 text-slate-400'}>
+    <span className={classMap[status] ?? 'badge'} style={classMap[status] ? {} : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
       {status === 'critical' ? <AlertCircleIcon /> : status === 'low' ? <AlertTriangleIcon /> : <CheckCircle2Icon />}
-      {STOCK_STATUS_LABELS[status] ?? status}
+      {t.stockStatusLabels[status] ?? status}
     </span>
   )
 }

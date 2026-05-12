@@ -9,10 +9,16 @@ const ICONS = {
   warning: <AlertTriangleIcon size={16} />,
 }
 
-const STYLES = {
-  success: 'bg-slate-800 border-teal-500/40 text-teal-300',
-  error:   'bg-slate-800 border-red-500/40 text-red-300',
-  warning: 'bg-slate-800 border-amber-500/40 text-amber-300',
+const BORDER_COLORS = {
+  success: 'color-mix(in srgb, var(--success) 40%, transparent)',
+  error:   'color-mix(in srgb, var(--danger)  40%, transparent)',
+  warning: 'color-mix(in srgb, var(--warning) 40%, transparent)',
+}
+
+const ICON_COLORS = {
+  success: 'var(--success)',
+  error:   'var(--danger)',
+  warning: 'var(--warning)',
 }
 
 export function ToastProvider({ children }) {
@@ -32,19 +38,18 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={toast}>
       {children}
       {/* Toast container */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 w-80 pointer-events-none">
+      <div className="fixed top-6 right-6 z-[9999] flex flex-col gap-2 w-80 pointer-events-none">
         {toasts.map(t => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-xl
-              animate-in slide-in-from-bottom-2 fade-in duration-200
-              ${STYLES[t.type] ?? STYLES.success}`}
+            className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-xl animate-in slide-in-from-top-2 fade-in duration-200"
+            style={{ background: 'var(--bg-surface)', borderColor: BORDER_COLORS[t.type] ?? BORDER_COLORS.success }}
           >
-            <span className="mt-0.5 shrink-0">{ICONS[t.type]}</span>
-            <span className="text-sm flex-1 leading-snug text-slate-200">{t.message}</span>
+            <span className="mt-0.5 shrink-0" style={{ color: ICON_COLORS[t.type] ?? ICON_COLORS.success }}>{ICONS[t.type]}</span>
+            <span className="text-sm flex-1 leading-snug" style={{ color: 'var(--text-primary)' }}>{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
-              className="shrink-0 text-slate-500 hover:text-slate-300 transition-colors mt-0.5"
+              className="btn-ghost shrink-0 p-0.5 mt-0.5"
             >
               <XIcon size={14} />
             </button>

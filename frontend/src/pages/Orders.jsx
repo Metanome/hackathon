@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getOrders, updateOrderStatus } from '../api/orders'
-import { SOURCE_LABELS, STATUS_LABELS } from '../constants'
 import { useSSE } from '../providers/SSEProvider'
 import { useToast } from '../providers/ToastProvider'
 import { useTheme } from '../providers/ThemeProvider'
 import { T } from '../constants'
-import { ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XCircleIcon } from '../components/Icons'
+import { ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XCircleIcon, ShoppingCartIcon } from '../components/Icons'
+import SkeletonCard from '../components/SkeletonCard'
+import EmptyState from '../components/EmptyState'
 
 export default function Orders() {
   const [orders, setOrders] = useState([])
@@ -39,8 +40,12 @@ export default function Orders() {
     }
   }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
-  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</div>
+  if (loading) return (
+    <div className="space-y-3">
+      <SkeletonCard /><SkeletonCard /><SkeletonCard />
+    </div>
+  )
+  if (error) return <div className="text-sm" style={{ color: 'var(--danger)' }}>{t.error}: {error}</div>
 
   return (
     <div className="space-y-6">
@@ -49,6 +54,13 @@ export default function Orders() {
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{orders.length} {t.totalOrders}</p>
       </div>
 
+      {orders.length === 0 ? (
+        <EmptyState
+          icon={<ShoppingCartIcon size={48} />}
+          title={t.noOrders}
+          description={t.noOrdersDesc}
+        />
+      ) : (
       <div className="space-y-2">
         {orders.map(order => (
           <div key={order.id} className="card">
@@ -58,13 +70,13 @@ export default function Orders() {
                 <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>#{order.id}</span>
                 <span className="font-medium" style={{ color: 'var(--accent)' }}>{order.customer_name}</span>
                 <span className="badge badge-source">
-                  {SOURCE_LABELS[order.source] ?? order.source}
+                  {t.sourceLabels[order.source] ?? order.source}
                 </span>
                 <span className={`badge ${
                   order.status === 'fulfilled' ? 'badge-ok' :
                   order.status === 'cancelled' ? 'badge-critical' : 'badge-low'
                 }`}>
-                  {STATUS_LABELS[order.status]}
+                  {t.statusLabels[order.status]}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -102,7 +114,7 @@ export default function Orders() {
                 {order.status === 'pending' && (
                   <div className="mt-4 flex gap-2 justify-end">
                     <button onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                      className="btn-ghost py-1 text-xs flex items-center gap-1.5" style={{ color: '#f87171' }}>
+                      className="btn-ghost py-1 text-xs flex items-center gap-1.5" style={{ color: 'var(--danger)' }}>
                       <XCircleIcon size={14} />
                       {t.cancelOrder}
                     </button>
@@ -118,6 +130,7 @@ export default function Orders() {
           </div>
         ))}
       </div>
+      )}
     </div>
   )
 }
