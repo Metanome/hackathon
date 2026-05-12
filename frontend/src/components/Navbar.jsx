@@ -1,3 +1,4 @@
+import EsnafLogo from '../assets/esnaf-tezgahi-logo.svg'
 import { NavLink } from 'react-router-dom'
 import { ROUTES, T } from '../constants'
 import { useTheme } from '../providers/ThemeProvider'
@@ -28,16 +29,24 @@ export default function Navbar({ isOpen, onClose }) {
         className={`fixed top-0 left-0 h-full w-56 flex flex-col z-50 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-color)' }}
       >
-        <div className="px-5 py-6 flex justify-between items-center"
-          style={{ borderBottom: '1px solid var(--border-color)' }}>
-          <div>
-            <div className="font-bold text-lg leading-tight" style={{ color: 'var(--accent)' }}>
-              Esnaf Tezgahı
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              {t.appSubtitle}
-            </div>
-          </div>
+        <div className="px-4 py-5 flex justify-between items-center"
+          style={{
+            borderBottom: '1px solid var(--border-color)',
+            background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+            backdropFilter: 'blur(8px)'
+          }}>
+          <img
+            src={EsnafLogo}
+            alt="Esnaf Tezgahi"
+            style={{
+              height: '64px',
+              width: 'auto',
+              transition: 'transform 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          />
           <button onClick={onClose} className="md:hidden" style={{ color: 'var(--text-secondary)' }}>
             <XIcon size={20} />
           </button>
@@ -65,7 +74,7 @@ export default function Navbar({ isOpen, onClose }) {
         </ul>
 
         <div className="px-5 py-4" style={{ borderTop: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '12px' }}>
-          {profile.store_name || 'Esnaf Tezgahı'}
+          {profile.store_name || 'Esnaf Tezgahi'}
         </div>
       </nav>
     </>
