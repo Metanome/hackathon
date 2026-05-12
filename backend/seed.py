@@ -4,7 +4,6 @@ Run once: python seed.py
 Idempotent - skips seeding if products already exist.
 """
 
-import sqlite3
 from database import init_db, get_connection
 
 

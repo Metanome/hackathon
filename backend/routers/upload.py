@@ -38,7 +38,7 @@ async def upload_image(
     if file.content_type not in _SUPPORTED_IMAGE_TYPES:
         raise HTTPException(
             status_code=415,
-            detail=f"Unsupported image type: {file.content_type}. Use JPEG, PNG, or WEBP.",
+            detail="ERR_UNSUPPORTED_IMAGE",
         )
 
     image_bytes = await file.read()
@@ -46,12 +46,12 @@ async def upload_image(
     try:
         classification = classifier_agent.classify_image(image_bytes, file.content_type)
     except ServerError:
-        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
+        raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
 
     if classification.type == "unknown" or classification.confidence == "low":
         raise HTTPException(
             status_code=422,
-            detail="Could not identify the image. Please upload a clear photo of an order slip or a shelf.",
+            detail="ERR_IMAGE_UNIDENTIFIED",
         )
 
     try:
@@ -60,9 +60,9 @@ async def upload_image(
         else:
             result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn, lang)
     except ServerError:
-        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
+    except ValueError:
+        raise HTTPException(status_code=422, detail="ERR_AI_PARSE")
 
     log_repo = AgentLogRepository(conn)
     log_repo.create(
@@ -89,16 +89,16 @@ async def upload_audio(
     if mime not in _SUPPORTED_AUDIO_TYPES:
         raise HTTPException(
             status_code=415,
-            detail=f"Unsupported audio type: {file.content_type}.",
+            detail="ERR_UNSUPPORTED_AUDIO",
         )
 
     audio_bytes = await file.read()
     try:
         intent_result = voice_agent.process_audio(audio_bytes, mime)
     except ServerError:
-        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
+    except ValueError:
+        raise HTTPException(status_code=422, detail="ERR_AI_PARSE")
 
     actions: list[str] = [f"[mic] Transcribed: \"{intent_result.original_transcription}\""]
     alerts_created = 0

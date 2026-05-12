@@ -30,7 +30,7 @@ export default function ConfirmDialog({ open, title, message, onConfirm, onCance
             <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{message}</p>
           </div>
         </div>
-        <div className="flex gap-3 justify-end pt-1" style={{ borderTop: '1px solid var(--border-color)' }}>
+        <div className="flex gap-3 justify-end pt-1">
           <button onClick={onCancel} className="btn-ghost">{t.cancel}</button>
           <button
             onClick={onConfirm}

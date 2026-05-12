@@ -103,7 +103,12 @@ function VoiceRecorder({ onFile, disabled }) {
             {t.orUploadFile}
           </button>
           <input ref={fileInputRef} type="file" accept={ACCEPTED_AUDIO} className="hidden"
-            onChange={e => e.target.files[0] && onFile(e.target.files[0])} />
+            onChange={e => {
+              if (e.target.files && e.target.files[0]) {
+                onFile(e.target.files[0])
+                e.target.value = null
+              }
+            }} />
         </>
       )}
     </div>
@@ -122,7 +127,7 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
   }, [onFile])
 
   return (
-    <label
+    <div
       className={`card flex flex-col items-center justify-center gap-3 cursor-pointer border-2 border-dashed transition-all duration-200 py-12 text-center ${disabled ? 'opacity-40 pointer-events-none' : ''}`}
       style={{ borderColor: dragging ? 'var(--accent)' : 'var(--border-color)' }}
       onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
@@ -136,8 +141,14 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
         <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{hint}</div>
       </div>
       <input ref={inputRef} type="file" accept={accept} className="hidden"
-        onChange={(e) => { if (e.target.files[0]) onFile(e.target.files[0]) }} />
-    </label>
+        onChange={(e) => {
+          if (e.target.files && e.target.files[0]) {
+            onFile(e.target.files[0])
+            // Clear value so the same file can be uploaded again if needed
+            e.target.value = null
+          }
+        }} />
+    </div>
   )
 }
 
@@ -162,7 +173,7 @@ export default function Upload() {
       setResult(data)
     } catch (e) {
       steps.forEach((_, i) => clearTimeout(timers[i]))
-      setError(e.response?.data?.detail || e.message || 'Upload failed')
+      setError(e.response?.data?.detail || e.message || t.uploadFailed)
     } finally {
       setThinking(false)
     }

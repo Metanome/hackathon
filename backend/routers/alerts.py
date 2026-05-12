@@ -25,7 +25,7 @@ def resolve_alert(
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> dict:
     if not AlertRepository(conn).resolve(alert_id):
-        raise HTTPException(status_code=404, detail="Alert not found")
+        raise HTTPException(status_code=404, detail="ERR_ALERT_NOT_FOUND")
     conn.commit()
     notify_clients("update")
     return {"success": True}

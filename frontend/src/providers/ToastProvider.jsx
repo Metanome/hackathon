@@ -46,7 +46,7 @@ export function ToastProvider({ children }) {
             style={{ background: 'var(--bg-surface)', borderColor: BORDER_COLORS[t.type] ?? BORDER_COLORS.success }}
           >
             <span className="mt-0.5 shrink-0" style={{ color: ICON_COLORS[t.type] ?? ICON_COLORS.success }}>{ICONS[t.type]}</span>
-            <span className="text-sm flex-1 leading-snug" style={{ color: 'var(--text-primary)' }}>{t.message}</span>
+            <span className="text-sm flex-1 leading-snug" style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
               className="btn-ghost shrink-0 p-0.5 mt-0.5"

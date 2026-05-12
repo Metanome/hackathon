@@ -32,7 +32,7 @@ def update_order(
     # Check current status first to prevent double-deduction
     current_order = repo.get_by_id(order_id)
     if not current_order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="ERR_ORDER_NOT_FOUND")
         
     if current_order.status == "pending" and data.status == "fulfilled":
         prod_repo = ProductRepository(conn)
@@ -49,7 +49,7 @@ def update_order(
         if insufficient:
             raise HTTPException(
                 status_code=422,
-                detail="Insufficient stock — " + "; ".join(insufficient),
+                detail={"code": "ERR_INSUFFICIENT_STOCK", "items": insufficient},
             )
 
         for item in current_order.items:
