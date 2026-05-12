@@ -54,14 +54,6 @@ def process_order_slip(
         else:
             product = matches[0]
 
-        if product.stock_quantity < item.quantity:
-            actions.append(
-                f"[warn] Insufficient stock for {product.name}: need {item.quantity}, have {product.stock_quantity} — skipped deduction"
-            )
-        else:
-            product_repo.update_stock(product.id, -item.quantity)
-            actions.append(f"[ok] Deducted {item.quantity}× {product.name} from stock")
-
         order_items.append({"product_id": product.id, "quantity": item.quantity})
         sync_alert(conn, product.id)
         actions.append(f"[alert] Alert synced for {product.name}")

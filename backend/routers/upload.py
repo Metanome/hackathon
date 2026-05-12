@@ -132,14 +132,6 @@ async def upload_audio(
             else:
                 product = matches[0]
 
-            if product.stock_quantity < quantity:
-                actions.append(f"[warn] Insufficient stock for {product.name}: need {quantity}, have {product.stock_quantity} — skipped deduction")
-            else:
-                product_repo.update_stock(product.id, -quantity)
-                actions.append(f"[ok] Deducted {quantity}× {product.name} from stock")
-            conn.commit() # Commit before background task
-            background_tasks.add_task(check_and_alert_stock, product.id)
-            
             order_repo.create(
                 OrderCreate(
                     customer_name=customer,
