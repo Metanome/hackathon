@@ -62,7 +62,39 @@ def generate_from_image(image_bytes: bytes, mime_type: str, prompt: str, model: 
     return _parse_json_response(response.text)
 
 
+_models_cache: list[str] = []
+_models_cache_at: float = 0.0
+_MODELS_TTL = 600  # seconds
+
+
+def list_models() -> list[str]:
+    """Return available generateContent-capable Gemini models from the API.
+    Result is cached for 10 minutes; returns empty list on error."""
+    global _models_cache, _models_cache_at
+    if _models_cache and (time.time() - _models_cache_at) < _MODELS_TTL:
+        return _models_cache
+    try:
+        result = []
+        for m in _get_client().models.list():
+            name: str = m.name or ""
+            if not name.startswith("models/gemini-"):
+                continue
+            actions = getattr(m, "supported_actions", []) or []
+            if "generateContent" not in actions:
+                continue
+            result.append(name.removeprefix("models/"))
+        _models_cache = sorted(result)
+        _models_cache_at = time.time()
+        return _models_cache
+    except Exception as exc:
+        logging.warning(f"Could not fetch model list from Gemini API: {exc}")
+        return []
+
+
 def clear_client_cache() -> None:
+    global _models_cache, _models_cache_at
+    _models_cache = []
+    _models_cache_at = 0.0
     _get_client.cache_clear()
 
 

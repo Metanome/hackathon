@@ -4,13 +4,13 @@ from pathlib import Path
 from fastapi import APIRouter, Depends
 
 from config import get_settings
-from services.gemini_service import clear_client_cache
+from services.gemini_service import clear_client_cache, list_models
 from database import db_dependency
 from repositories.agent_log_repository import AgentLogRepository
 from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
 from schemas.agent import AgentActionLog
-from schemas.settings import AVAILABLE_MODELS, SettingsResponse, SettingsUpdate, ProfileResponse, ProfileUpdate
+from schemas.settings import SettingsResponse, SettingsUpdate, ProfileResponse, ProfileUpdate
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -20,7 +20,7 @@ def get_settings_endpoint() -> SettingsResponse:
     settings = get_settings()
     return SettingsResponse(
         default_model=settings.default_model,
-        available_models=AVAILABLE_MODELS,
+        available_models=list_models(),
         api_key_set=bool(settings.gemini_api_key),
     )
 
@@ -34,7 +34,7 @@ def update_settings(data: SettingsUpdate) -> SettingsResponse:
     env_lines = env_path.read_text(encoding="utf-8").splitlines() if env_path.exists() else []
 
     new_values: dict[str, str] = {}
-    if data.default_model and data.default_model in AVAILABLE_MODELS:
+    if data.default_model and data.default_model in list_models():
         new_values["DEFAULT_MODEL"] = data.default_model
     if data.gemini_api_key:
         new_values["GEMINI_API_KEY"] = data.gemini_api_key
