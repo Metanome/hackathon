@@ -30,7 +30,7 @@ export default function Navbar({ isOpen, onClose }) {
           style={{ borderBottom: '1px solid var(--border-color)' }}>
           <div>
             <div className="font-bold text-lg leading-tight" style={{ color: 'var(--accent)' }}>
-              Esnaf Tezgahi
+              Esnaf Tezgahı
             </div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
               AI Operations Platform
@@ -63,7 +63,7 @@ export default function Navbar({ isOpen, onClose }) {
         </ul>
 
         <div className="px-5 py-4" style={{ borderTop: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '12px' }}>
-          Anadolu Dogal Kooperatifi
+          Anadolu Doğal Kooperatifi
         </div>
       </nav>
     </>

@@ -28,14 +28,14 @@ export default function Settings() {
       await save(payload)
       setApiKey('')
       setSaved(true)
-      toast('Ayarlar kaydedildi.', 'success')
+      toast(t.settingsSaved, 'success')
       setTimeout(() => setSaved(false), 3000)
     } catch (_) {
-      toast('Ayarlar kaydedilemedi.', 'error')
+      toast(t.settingsSaveFailed, 'error')
     }
   }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor...</div>
+  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
 
   const currentModel = model || settings?.default_model || ''
 
@@ -44,7 +44,7 @@ export default function Settings() {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t.settings}</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          {lang === 'tr' ? 'AI modelini ve API kimlik bilgilerini yapılandır.' : 'Configure your AI model and API credentials.'}
+          {t.settingsDesc}
         </p>
       </div>
 
@@ -79,34 +79,32 @@ export default function Settings() {
             </button>
           </div>
           <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-            {lang === 'tr' ? 'API anahtarı .env dosyanızda saklanır, tarayıcıya gönderilmez.' : 'API key is stored in your .env file and never sent to the browser.'}
+            {t.apiKeyNote}
           </p>
         </div>
 
-        {error && <p className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</p>}
+        {error && <p className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</p>}
 
         <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={handleSave} disabled={saving}>
           {saving
-            ? <><RotateCcwIcon size={15} className="animate-spin" /> {lang === 'tr' ? 'Kaydediliyor...' : 'Saving...'}</>
+            ? <><RotateCcwIcon size={15} className="animate-spin" /> {t.saving}</>
             : saved
-            ? <><SaveIcon size={15} /> {lang === 'tr' ? 'Kaydedildi!' : 'Saved!'}</>
-            : <><SaveIcon size={15} /> {lang === 'tr' ? 'Ayarları Kaydet' : 'Save Settings'}</>}
+            ? <><SaveIcon size={15} /> {t.savedBang}</>
+            : <><SaveIcon size={15} /> {t.saveSettings}</>}
         </button>
       </div>
 
       <div className="card text-xs space-y-1" style={{ color: 'var(--text-muted)' }}>
-        <div>{lang === 'tr' ? 'Mevcut model:' : 'Current model:'} <span style={{ color: 'var(--text-secondary)' }}>{settings?.default_model}</span></div>
-        <div>API key: <span style={{ color: 'var(--text-secondary)' }}>{settings?.api_key_set ? (lang === 'tr' ? 'Ayarlandı' : 'Set') : (lang === 'tr' ? 'Ayarlanmadı' : 'Not set')}</span></div>
+        <div>{t.currentModel} <span style={{ color: 'var(--text-secondary)' }}>{settings?.default_model}</span></div>
+        <div>API key: <span style={{ color: 'var(--text-secondary)' }}>{settings?.api_key_set ? t.keySet : t.keyNotSet}</span></div>
       </div>
 
       <div className="mt-8 pt-8" style={{ borderTop: '1px solid var(--border-color)' }}>
         <h2 className="text-xl font-bold mb-2" style={{ color: '#f87171' }}>
-          {lang === 'tr' ? 'Tehlikeli Bölge' : 'Danger Zone'}
+          {t.dangerZone}
         </h2>
         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-          {lang === 'tr'
-            ? 'Tüm veritabanı tablolarını kalıcı olarak siler ve varsayılan verilerle yeniden doldurur.'
-            : 'Irreversibly drop all database tables and reseed with default data.'}
+          {t.dangerZoneDesc}
         </p>
         <button
           className="btn-ghost flex items-center gap-2 py-2 px-4 transition-colors"
@@ -116,16 +114,14 @@ export default function Settings() {
         >
           <RotateCcwIcon size={15} />
           {resetting
-            ? (lang === 'tr' ? 'Sıfırlanıyor...' : 'Resetting...')
-            : (lang === 'tr' ? 'Veritabanını Sıfırla ve Yeniden Doldur' : 'Reset Database & Reseed')}
+            ? t.resetting
+            : t.resetDb}
         </button>
 
         <ConfirmDialog
           open={confirmReset}
-          title={lang === 'tr' ? 'Veritabanı Sıfırlansın mı?' : 'Reset Database?'}
-          message={lang === 'tr'
-            ? 'Tüm siparişler, stok ve uyarılar kalıcı olarak silinecek ve varsayılan verilerle yeniden doldurulacak. Bu işlem geri alınamaz.'
-            : 'This will permanently delete all orders, inventory, and alerts, then reseed with default data. This cannot be undone.'}
+          title={t.resetConfirmTitle}
+          message={t.resetConfirmMsg}
           danger
           onCancel={() => setConfirmReset(false)}
           onConfirm={async () => {
@@ -135,7 +131,7 @@ export default function Settings() {
               await resetDatabase()
               window.location.reload()
             } catch (e) {
-              toast('Sıfırlama başarısız: ' + (e.response?.data?.detail || e.message), 'error')
+              toast(`${t.resetFailed} ${e.response?.data?.detail || e.message}`, 'error')
               setResetting(false)
             }
           }}

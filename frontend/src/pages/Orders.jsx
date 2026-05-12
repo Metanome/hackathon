@@ -33,14 +33,14 @@ export default function Orders() {
     try {
       await updateOrderStatus(id, status)
       setOrders(orders.map(o => o.id === id ? { ...o, status } : o))
-      toast(status === 'fulfilled' ? 'Sipariş tamamlandı.' : 'Sipariş iptal edildi.', status === 'fulfilled' ? 'success' : 'warning')
+      toast(status === 'fulfilled' ? t.orderFulfilled : t.orderCancelled, status === 'fulfilled' ? 'success' : 'warning')
     } catch (e) {
       toast(e.response?.data?.detail || e.message, 'error')
     }
   }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor...</div>
-  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</div>
+  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
+  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</div>
 
   return (
     <div className="space-y-6">
@@ -104,12 +104,12 @@ export default function Orders() {
                     <button onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                       className="btn-ghost py-1 text-xs flex items-center gap-1.5" style={{ color: '#f87171' }}>
                       <XCircleIcon size={14} />
-                      Siparişi İptal Et
+                      {t.cancelOrder}
                     </button>
                     <button onClick={() => handleUpdateStatus(order.id, 'fulfilled')}
                       className="btn-primary py-1 px-4 text-xs flex items-center gap-1.5">
                       <CheckCircleIcon size={14} />
-                      Siparişi Tamamla
+                      {t.fulfillOrder}
                     </button>
                   </div>
                 )}

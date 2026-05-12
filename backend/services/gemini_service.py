@@ -46,6 +46,10 @@ def generate_from_image(image_bytes: bytes, mime_type: str, prompt: str, model: 
     return _parse_json_response(response.text)
 
 
+def clear_client_cache() -> None:
+    _get_client.cache_clear()
+
+
 def generate_from_audio(audio_bytes: bytes, mime_type: str, prompt: str, model: str | None = None) -> dict:
     audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
     response = _get_client().models.generate_content(

@@ -1,9 +1,9 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
-import { ROUTES, T } from '../constants'
+import { ROUTES, T, ALERT_TYPE_LABELS } from '../constants'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTheme } from '../providers/ThemeProvider'
-import { BellIcon, MenuIcon, PlusIcon } from './Icons'
+import { BellIcon, MenuIcon, PlusIcon, SunIcon, MoonIcon } from './Icons'
 
 export default function Header({ onMenuClick }) {
   const { alerts } = useAlerts()
@@ -75,7 +75,7 @@ export default function Header({ onMenuClick }) {
         <button onClick={toggleTheme}
           className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full transition-all"
           style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-          {theme === 'dark' ? '☀' : '☾'}
+          {theme === 'dark' ? <SunIcon size={14} /> : <MoonIcon size={14} />}
         </button>
 
         <Link to={ROUTES.UPLOAD} className="btn-primary flex items-center gap-2 py-1.5 px-4 text-sm hidden sm:flex">
@@ -109,13 +109,13 @@ export default function Header({ onMenuClick }) {
                       style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <p className="text-xs leading-snug" style={{ color: 'var(--text-secondary)' }}>{alert.message}</p>
                       <span className="text-[10px] mt-1 block" style={{ color: 'var(--text-muted)' }}>
-                        {alert.type === 'setup_required' ? 'Kurulum Gerekli' : 'Dusuk Stok'}
+                        {ALERT_TYPE_LABELS[alert.type] ?? alert.type}
                       </span>
                     </div>
                   ))}
                   {alerts.length > 5 && (
                     <div className="px-4 py-2 text-center" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>+{alerts.length - 5} daha</span>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>+{alerts.length - 5} {t.more}</span>
                     </div>
                   )}
                   <div className="p-2">

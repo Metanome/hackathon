@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTheme } from '../providers/ThemeProvider'
+import { SunIcon, MoonIcon, SlidersIcon } from './Icons'
 
 export default function AccessibilityBar() {
   const { theme, toggleTheme, fontSize, cycleFontSize } = useTheme()
@@ -7,33 +8,26 @@ export default function AccessibilityBar() {
 
   const fontLabel = { md: 'A', lg: 'A+', xl: 'A++' }[fontSize]
 
-  const btnStyle = {
-    width: '36px', height: '36px', borderRadius: '50%',
-    background: 'var(--bg-surface)', border: '1px solid var(--border-color)',
-    color: 'var(--text-secondary)', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    transition: 'all 0.15s'
-  }
+  const btnCls = "w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer"
+  const btnStyle = { background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }
 
   return (
-    <div
-      style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: 9999 }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
+    <div className="fixed bottom-5 right-5 z-[9999] flex flex-col items-center gap-1.5">
       {open && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '6px' }}>
-          <button onClick={toggleTheme} title={theme === 'dark' ? 'Açık tema' : 'Koyu tema'} style={btnStyle}>
-            {theme === 'dark' ? '☀' : '☾'}
+        <>
+          <button onClick={toggleTheme} title={theme === 'dark' ? 'Açık tema' : 'Koyu tema'}
+            className={btnCls} style={btnStyle}>
+            {theme === 'dark' ? <SunIcon size={15} /> : <MoonIcon size={15} />}
           </button>
-          <button onClick={cycleFontSize} title="Yazı boyutu" style={{ ...btnStyle, fontSize: '13px', fontWeight: '700' }}>
+          <button onClick={cycleFontSize} title="Yazı boyutu"
+            className={`${btnCls} text-xs font-bold`} style={btnStyle}>
             {fontLabel}
           </button>
-        </div>
+        </>
       )}
-      <button style={{ ...btnStyle, opacity: open ? 1 : 0.6 }} title="Erişilebilirlik">
-        ♿
+      <button onClick={() => setOpen(v => !v)} title="Erişilebilirlik"
+        className={`${btnCls} ${open ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`} style={btnStyle}>
+        <SlidersIcon size={15} />
       </button>
     </div>
   )

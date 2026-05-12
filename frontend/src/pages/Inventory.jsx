@@ -45,10 +45,10 @@ export default function Inventory() {
     setEditId(null)
   }
 
-  const filterLabels = { all: 'Tümü', critical: 'Kritik', low: 'Düşük', ok: 'Normal' }
+  const filterLabels = { all: t.all, critical: t.filterCritical, low: t.filterLow, ok: t.filterNormal }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor...</div>
-  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</div>
+  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
+  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</div>
 
   return (
     <div className="space-y-6">
@@ -57,7 +57,7 @@ export default function Inventory() {
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t.inventory}</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
             {products.length} {t.totalProducts}
-            {q && <span className="ml-2" style={{ color: 'var(--accent)' }}>· "{q}" filtresi</span>}
+            {q && <span className="ml-2" style={{ color: 'var(--accent)' }}>· "{q}" {t.searchFilter}</span>}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -71,7 +71,7 @@ export default function Inventory() {
           <div className="w-px h-6 mx-2 self-center" style={{ background: 'var(--border-color)' }}></div>
           <button onClick={() => fileInputRef.current?.click()} className="btn-ghost flex items-center gap-2" disabled={uploading}>
             <UploadIcon size={16} />
-            {uploading ? 'Yükleniyor...' : t.importCsv}
+            {uploading ? t.loading : t.importCsv}
           </button>
           <input type="file" accept=".csv" ref={fileInputRef} className="hidden"
             onChange={async (e) => {
@@ -79,7 +79,7 @@ export default function Inventory() {
                 setUploading(true)
                 try {
                   const res = await upload(e.target.files[0])
-                  toast(`${res.added_count} ürün başarıyla içe aktarıldı.`, 'success')
+                  toast(`${res.added_count} ${t.importedSuffix}`, 'success')
                 } catch (err) {
                   toast(err.response?.data?.detail || err.message, 'error')
                 }
@@ -164,60 +164,60 @@ export default function Inventory() {
         <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
           <div className="card w-full max-w-md space-y-6">
             <div>
-              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{newProduct.id ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}</h2>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{newProduct.id ? 'Ürün bilgilerini güncelleyin.' : 'Stoğa eklemek için ürün bilgilerini girin.'}</p>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{newProduct.id ? t.editProduct : t.addProductTitle}</h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{newProduct.id ? t.editProductDesc : t.addProductDesc}</p>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>İsim</label>
+                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.productName}</label>
                 <input type="text" className="input" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder="ör. Premium Kahve" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Kategori</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.category}</label>
                   <input type="text" className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} placeholder="ör. İçecekler" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Fiyat</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.price}</label>
                   <input type="number" step="0.01" className="input" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} placeholder="0.00" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Başlangıç Stok</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.initialStock}</label>
                   <input type="number" className="input" value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} placeholder="0" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Eşik</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.threshold}</label>
                   <input type="number" className="input" value={newProduct.threshold} onChange={e => setNewProduct({...newProduct, threshold: e.target.value})} placeholder="10" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Tedarikçi Adı</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.supplierName}</label>
                   <input type="text" className="input" value={newProduct.supplierName} onChange={e => setNewProduct({...newProduct, supplierName: e.target.value})} placeholder="ör. Anadolu Tarım" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Tedarikçi E-posta</label>
+                  <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.supplierEmail}</label>
                   <input type="email" className="input" value={newProduct.supplierEmail} onChange={e => setNewProduct({...newProduct, supplierEmail: e.target.value})} placeholder="iletisim@anadolu.com" />
                 </div>
               </div>
             </div>
             <div className="flex gap-3 justify-end pt-2" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <button onClick={() => setShowModal(false)} className="btn-ghost">İptal</button>
+              <button onClick={() => setShowModal(false)} className="btn-ghost">{t.cancel}</button>
               <button onClick={async () => {
-                if (!newProduct.name) return toast('İsim zorunludur', 'warning')
+                if (!newProduct.name) return toast(t.nameRequired, 'warning')
                 setSaving(true)
                 try {
                   const payload = { name: newProduct.name, category: newProduct.category || 'Genel', unit_price: parseFloat(newProduct.price || 0), stock_quantity: parseInt(newProduct.stock || 0, 10), reorder_threshold: parseInt(newProduct.threshold || 10, 10), supplier_name: newProduct.supplierName || '', supplier_email: newProduct.supplierEmail || '' }
-                  if (newProduct.id) { await patch(newProduct.id, payload); toast('Ürün güncellendi.', 'success') }
-                  else { await create(payload); toast('Ürün stoğa eklendi.', 'success') }
+                  if (newProduct.id) { await patch(newProduct.id, payload); toast(t.productUpdated, 'success') }
+                  else { await create(payload); toast(t.productAdded, 'success') }
                   setShowModal(false)
                   setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', supplierName: '', supplierEmail: '' })
-                } catch (e) { toast(e.response?.data?.detail || 'Ürün kaydedilemedi', 'error') }
+                } catch (e) { toast(e.response?.data?.detail || t.productSaveFailed, 'error') }
                 setSaving(false)
               }} disabled={saving || !newProduct.name} className="btn-primary">
-                {saving ? 'Kaydediliyor...' : (newProduct.id ? 'Değişiklikleri Kaydet' : 'Ürün Ekle')}
+                {saving ? t.saving : (newProduct.id ? t.saveChanges : t.addProduct)}
               </button>
             </div>
           </div>
@@ -226,13 +226,15 @@ export default function Inventory() {
 
       <ConfirmDialog
         open={!!confirmDelete}
-        title="Ürünü Sil"
-        message={`"${confirmDelete?.name}" ürününü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+        title={t.deleteProduct}
+        message={lang === 'tr'
+          ? `"${confirmDelete?.name}" ürününü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
+          : `Are you sure you want to delete "${confirmDelete?.name}"? This action cannot be undone.`}
         danger
         onCancel={() => setConfirmDelete(null)}
         onConfirm={async () => {
           await remove(confirmDelete.id)
-          toast(`"${confirmDelete.name}" silindi.`, 'warning')
+          toast(`"${confirmDelete.name}" ${t.deletedSuffix}`, 'warning')
           setConfirmDelete(null)
         }}
       />

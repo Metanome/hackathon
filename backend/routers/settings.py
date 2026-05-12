@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends
 
 from config import get_settings
+from services.gemini_service import clear_client_cache
 from database import db_dependency
 from repositories.agent_log_repository import AgentLogRepository
 from repositories.alert_repository import AlertRepository
@@ -54,8 +55,9 @@ def update_settings(data: SettingsUpdate) -> SettingsResponse:
 
     env_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
 
-    # Invalidate cached settings so next request picks up new values
+    # Invalidate cached settings and Gemini client so next request picks up new values
     get_settings.cache_clear()
+    clear_client_cache()
 
     return get_settings_endpoint()
 

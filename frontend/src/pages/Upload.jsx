@@ -92,9 +92,9 @@ export default function Upload() {
 
       {error && (
         <div className="card" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.05)' }}>
-          <p className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</p>
+          <p className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</p>
           <button className="btn-ghost mt-3 flex items-center gap-2" onClick={() => setError(null)}>
-            <RotateCcwIcon size={14} /> Tekrar dene
+            <RotateCcwIcon size={14} /> {t.retry}
           </button>
         </div>
       )}
@@ -102,12 +102,12 @@ export default function Upload() {
       {result && (
         <div className="space-y-4">
           <div className="card" style={{ borderColor: 'rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}>
-            <div className="font-semibold mb-1" style={{ color: '#4ade80' }}>İşlem tamamlandı</div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} uyarı oluşturuldu · Model: {result.model_used}</p>
+            <div className="font-semibold mb-1" style={{ color: '#4ade80' }}>{t.processingComplete}</div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} {t.alertsCreated} · Model: {result.model_used}</p>
           </div>
           <ReasoningPanel reasoning={result.reasoning} actions={result.actions_taken} model={result.model_used} />
           <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setResult(null)}>
-            <UploadIcon size={16} /> Başka Dosya Yükle
+            <UploadIcon size={16} /> {t.uploadAnother}
           </button>
         </div>
       )}

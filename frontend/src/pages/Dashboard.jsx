@@ -16,8 +16,8 @@ export default function Dashboard() {
     refresh()
   }
 
-  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor...</div>
-  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</div>
+  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</div>
+  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>{t.error}: {error}</div>
 
   return (
     <div className="space-y-8">
@@ -65,7 +65,7 @@ export default function Dashboard() {
                     {log.input_type.replace('_', ' ').toUpperCase()}
                   </span>
                   <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>
-                    {new Date(log.created_at).toLocaleString()}
+                    {new Date(log.created_at).toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')}
                   </span>
                 </div>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{log.reasoning}</p>
