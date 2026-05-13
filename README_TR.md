@@ -12,6 +12,8 @@
 
 # Esnaf Tezgahı
 
+[![Lisans: AGPL v3](https://img.shields.io/badge/Lisans-AGPL%20v3-blue.svg)](LICENSE)
+
 **Esnaf Tezgahı**, Türk KOBİ'leri için — yerel kooperatifler, butik dükkanlar ve mahalle marketleri için — geliştirilmiş çok modlu, ajanlı bir yapay zeka platformudur.
 
 **YZTA 5.0 Hackathon** kapsamında geliştirilen bu proje, manuel veri girişini ortadan kaldırarak geleneksel perakende işlemlerini modernize eder. Esnaflar; sesli komutlar, el yazısı sipariş fişlerinin ve depo raflarının fotoğrafları aracılığıyla stok yönetimi, sipariş işleme ve tedarikçi iletişimini — Türkçe veya İngilizce — tamamen otomatik olarak gerçekleştirebilir.

@@ -12,6 +12,8 @@
 
 # Esnaf Tezgahı
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+
 **Esnaf Tezgahı** is a multimodal, agentic AI platform engineered for Turkish SMEs — local cooperatives, boutique shops, and neighborhood markets.
 
 Developed for the **YZTA 5.0 Hackathon**, it modernizes traditional retail by eliminating manual data entry. Merchants manage inventory, process customer orders, and handle supplier communications through natural voice commands and image recognition of handwritten order slips or storage shelves — all in Turkish or English.
