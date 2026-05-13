@@ -126,7 +126,7 @@ Her yükleme, arayüzde tam düşünce zincirini ve zaman damgalı eylem günlü
 | **Ön Uç** | React 18, Vite, TailwindCSS v4, CSS Özel Özellikleri |
 | **Yapay Zeka** | Google Gemini (`gemini-2.0-flash` varsayılan; model yapılandırılabilir) |
 | **Gerçek Zamanlı** | Sunucu Taraflı Olaylar (SSE) |
-| **Test** | pytest, pytest-asyncio, httpx |
+| **Test** | Manuel |
 
 ## Proje Yapısı
 

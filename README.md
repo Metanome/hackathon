@@ -126,7 +126,7 @@ Every upload produces a **Reasoning Panel** in the UI showing the full chain of 
 | **Frontend** | React 18, Vite, TailwindCSS v4, CSS Custom Properties |
 | **AI** | Google Gemini (`gemini-2.0-flash` default; model is configurable) |
 | **Realtime** | Server-Sent Events (SSE) |
-| **Testing** | pytest, pytest-asyncio, httpx |
+| **Testing** | Manual |
 
 ## Project Structure
 
