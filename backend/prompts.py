@@ -15,15 +15,24 @@ Return ONLY valid JSON, no other text:
 """
 
 ORDER_EXTRACTION_PROMPT = """
-You are an operations assistant for a Turkish small business. 
+You are an operations assistant for a Turkish small business.
 Extract order information from this handwritten or printed order slip image.
 The text may be in Turkish or English.
+
+Unit extraction rules:
+- "N x Product", "N × Product", "N adet Product", "N tane Product" → unit is always "pcs".
+- Any weight or size in parentheses — e.g. "(5 kg)", "(850 gr)", "(1 L)" — is the package size descriptor, NOT the order unit. Never use it as the unit field.
+- Only use a bulk unit (kg, g, L, etc.) when the order explicitly writes a bulk quantity without x/×/adet notation, e.g. "3 kg un".
+- Quantities written as words (e.g. "dört", "on iki", "four") → convert to integer.
+- If a line is crossed out or struck through, skip it entirely.
+- Ignore price and total lines (B.Fiyat, Birim Fiyat, Tutar, Toplam, TL, ₺, etc.).
+- Canonical unit keys: pcs / kg / g / L / ml / pkg / box / btl / carton / sack / bunch, or null if truly unspecified.
 
 Return ONLY valid JSON, no other text:
 {
   "customer_name": "<name or 'Unknown' if not found>",
   "items": [
-    {"product_name": "<product name as written>", "quantity": <integer>, "unit": "<unit of measure, use canonical keys: pcs/kg/g/L/ml/pkg/box/btl/carton/sack/bunch, or null if not specified>"}
+    {"product_name": "<product name as written, including any variant in parentheses>", "quantity": <integer>, "unit": "<unit per rules above>"}
   ],
   "notes": "<any additional notes, or empty string>"
 }
@@ -35,10 +44,15 @@ SHELF_SCAN_PROMPT = """
 You are a stock assessment AI for a Turkish SME warehouse or shop.
 Analyze this shelf or storage area photo and assess stock levels.
 
-For each distinct product area or product you can identify:
-- "adequate": shelf looks well-stocked
-- "low": shelf is noticeably depleted, reorder soon
-- "critical": shelf is nearly empty or empty
+Status thresholds (estimate shelf fill level visually):
+- "adequate": shelf is more than ~50% full
+- "low": shelf is between ~10% and ~50% full — reorder soon
+- "critical": shelf is less than ~10% full, nearly empty, or completely empty
+
+Naming rules:
+- Use the product name exactly as written on the label or packaging if visible.
+- Preserve Turkish names as written (e.g. "Nohut", "Zeytinyağı"). Do not translate.
+- If no label is visible, use a brief descriptive name (e.g. "Canned goods area").
 
 Return ONLY valid JSON, no other text:
 {
@@ -51,27 +65,48 @@ Return ONLY valid JSON, no other text:
 """
 
 VOICE_INTENT_PROMPT = """
-You are an operations assistant for a Turkish SME. 
+You are an operations assistant for a Turkish SME.
 The user has sent a voice note. Transcribe it and extract their intent.
 The speech may be in Turkish or English.
 
 Supported intents:
-- "add_order": User wants to add an order for a customer (e.g. "Add 3 olive oils to Mehmet's tab")
+- "add_order": User wants to add an order for a customer (e.g. "Mehmet'e 3 zeytinyağı ve 5 nohut ekle")
 - "update_stock": User wants to record received stock (e.g. "We got 20 more chickpeas")
 - "query_stock": User wants to know current stock level (e.g. "How much honey do we have?")
 - "unknown": Intent is unclear
 
-Return ONLY valid JSON, no other text:
+Quantity rules:
+- Quantities written as words (e.g. "üç", "on", "three") → convert to integer.
+- Vague quantities ("birkaç", "biraz", "a few", "some") → use null.
+- Canonical unit keys: pcs / kg / g / L / ml / pkg / box / btl / carton / sack / bunch, or null.
+
+For "add_order", entities must use an items array to support multiple products in one command:
 {
-  "intent": "add_order" | "update_stock" | "query_stock" | "unknown",
+  "intent": "add_order",
   "entities": {
-    "customer_name": "<if add_order, else null>",
-    "product_name": "<product mentioned, or null>",
-    "quantity": <integer or null>,
-    "unit": "<unit of measure if mentioned, use canonical keys: pcs/kg/g/L/ml/pkg/box/btl/carton/sack/bunch, or null>"
+    "customer_name": "<customer name or null>",
+    "items": [
+      {"product_name": "<product>", "quantity": <integer or null>, "unit": "<unit or null>"}
+    ]
   },
   "original_transcription": "<full transcribed text>"
 }
+
+For "update_stock" and "query_stock":
+{
+  "intent": "update_stock" | "query_stock",
+  "entities": {
+    "product_name": "<product mentioned or null>",
+    "quantity": <integer or null>,
+    "unit": "<unit or null>"
+  },
+  "original_transcription": "<full transcribed text>"
+}
+
+For "unknown":
+{"intent": "unknown", "entities": {}, "original_transcription": "<full transcribed text>"}
+
+Return ONLY valid JSON, no other text.
 """
 
 PLANNER_REASONING_PROMPT = """

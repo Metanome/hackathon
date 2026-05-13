@@ -129,9 +129,19 @@ async def upload_audio(
 
     if intent_result.intent == "add_order":
         customer = intent_result.entities.get("customer_name") or _t("customer_unknown", lang)
-        product_name = intent_result.entities.get("product_name")
-        quantity = intent_result.entities.get("quantity") or 1
-        if product_name:
+        raw_items = intent_result.entities.get("items") or []
+        if not raw_items:
+            single = intent_result.entities.get("product_name")
+            if single:
+                raw_items = [{"product_name": single, "quantity": intent_result.entities.get("quantity") or 1, "unit": intent_result.entities.get("unit")}]
+
+        order_items: list[dict] = []
+        alert_repo = AlertRepository(conn)
+        for item in raw_items:
+            product_name = item.get("product_name")
+            quantity = item.get("quantity") or 1
+            if not product_name:
+                continue
             matches = product_repo.search_by_name(product_name)
             if not matches:
                 new_prod = product_repo.create(ProductCreate(
@@ -139,11 +149,9 @@ async def upload_audio(
                     category=_t("category_needs_setup", lang),
                     stock_quantity=0,
                     unit_price=0.0,
-                    unit=intent_result.entities.get("unit") or "pcs",
+                    unit=item.get("unit") or "pcs",
                 ))
                 product = new_prod
-
-                alert_repo = AlertRepository(conn)
                 alert_repo.create(AlertCreate(
                     type="setup_required",
                     product_id=new_prod.id,
@@ -153,15 +161,17 @@ async def upload_audio(
                 alerts_created += 1
             else:
                 product = matches[0]
+            order_items.append({"product_id": product.id, "quantity": quantity})
+            actions.append(_t("order_created_voice", lang, qty=quantity, name=product.name, customer=customer))
 
+        if order_items:
             order_repo.create(
                 OrderCreate(
                     customer_name=customer,
                     source="voice",
-                    items=[{"product_id": product.id, "quantity": quantity}],
+                    items=order_items,
                 )
             )
-            actions.append(_t("order_created_voice", lang, qty=quantity, name=product.name, customer=customer))
 
     elif intent_result.intent == "update_stock":
         product_name = intent_result.entities.get("product_name")
@@ -170,7 +180,7 @@ async def upload_audio(
             matches = product_repo.search_by_name(product_name)
             if matches:
                 product_repo.update_stock(matches[0].id, quantity)
-                conn.commit() # Commit before background task
+                conn.commit()
                 background_tasks.add_task(check_and_alert_stock, matches[0].id)
                 actions.append(_t("stock_updated", lang, qty=quantity, name=matches[0].name))
             else:
