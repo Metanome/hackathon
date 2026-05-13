@@ -2,7 +2,7 @@ import asyncio
 import io
 import sqlite3
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
 from PIL import Image
 from google.genai.errors import ServerError
 
@@ -19,7 +19,7 @@ from schemas.order import OrderCreate
 from schemas.product import ProductCreate
 from config import get_settings
 from i18n import t as _t
-from services.alert_service import check_and_alert_stock
+from services.alert_service import sync_alert_tracked
 from services.event_service import notify_clients
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
@@ -63,6 +63,7 @@ async def upload_image(
 
     image_bytes = await file.read()
     image_bytes, image_mime = await asyncio.to_thread(_compress_image, image_bytes, file.content_type)
+    notify_clients("progress:1")
 
     try:
         classification = await asyncio.to_thread(classifier_agent.classify_image, image_bytes, image_mime)
@@ -75,6 +76,7 @@ async def upload_image(
             detail="ERR_IMAGE_UNIDENTIFIED",
         )
 
+    notify_clients("progress:2")
     try:
         if classification.type == "order_slip":
             result = await asyncio.to_thread(vision_agent.process_order_slip, image_bytes, image_mime, conn, lang)
@@ -86,22 +88,22 @@ async def upload_image(
         raise HTTPException(status_code=422, detail="ERR_AI_PARSE")
 
     log_repo = AgentLogRepository(conn)
-    log_repo.create(
+    log = log_repo.create(
         input_type=result.input_type,
         input_summary=_t("image_log_summary", lang, type=classification.type, confidence=classification.confidence),
         reasoning=result.reasoning,
         actions_taken=result.actions_taken,
         model_used=result.model_used,
+        revert_data=result.revert_data,
     )
     conn.commit()
     notify_clients("update")
 
-    return result
+    return result.model_copy(update={"log_id": log.id})
 
 
 @router.post("/audio", response_model=UploadResult)
 async def upload_audio(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     lang: str = Form("en"),
     conn: sqlite3.Connection = Depends(db_dependency),
@@ -114,6 +116,7 @@ async def upload_audio(
         )
 
     audio_bytes = await file.read()
+    notify_clients("progress:1")
     try:
         intent_result = await asyncio.to_thread(voice_agent.process_audio, audio_bytes, mime)
     except ServerError:
@@ -121,8 +124,10 @@ async def upload_audio(
     except ValueError:
         raise HTTPException(status_code=422, detail="ERR_AI_PARSE")
 
+    notify_clients("progress:2")
     actions: list[str] = [_t("transcribed", lang, text=intent_result.original_transcription)]
     alerts_created = 0
+    revert_data: dict = {"orders_created": [], "products_created": [], "alerts_created": [], "stock_changes": []}
 
     product_repo = ProductRepository(conn)
     order_repo = OrderRepository(conn)
@@ -152,11 +157,13 @@ async def upload_audio(
                     unit=item.get("unit") or "pcs",
                 ))
                 product = new_prod
-                alert_repo.create(AlertCreate(
+                revert_data["products_created"].append(new_prod.id)
+                alert = alert_repo.create(AlertCreate(
                     type="setup_required",
                     product_id=new_prod.id,
                     message=_t("setup_required_message_voice", lang, name=product_name)
                 ))
+                revert_data["alerts_created"].append(alert.id)
                 actions.append(_t("auto_created_product", lang, name=product_name))
                 alerts_created += 1
             else:
@@ -165,13 +172,14 @@ async def upload_audio(
             actions.append(_t("order_created_voice", lang, qty=quantity, name=product.name, customer=customer))
 
         if order_items:
-            order_repo.create(
+            order = order_repo.create(
                 OrderCreate(
                     customer_name=customer,
                     source="voice",
                     items=order_items,
                 )
             )
+            revert_data["orders_created"].append(order.id)
 
     elif intent_result.intent == "update_stock":
         product_name = intent_result.entities.get("product_name")
@@ -179,9 +187,10 @@ async def upload_audio(
         if product_name and quantity:
             matches = product_repo.search_by_name(product_name)
             if matches:
+                old_qty = matches[0].stock_quantity
                 product_repo.update_stock(matches[0].id, quantity)
-                conn.commit()
-                background_tasks.add_task(check_and_alert_stock, matches[0].id)
+                revert_data["stock_changes"].append({"product_id": matches[0].id, "old_qty": old_qty})
+                sync_alert_tracked(conn, matches[0].id, revert_data)
                 actions.append(_t("stock_updated", lang, qty=quantity, name=matches[0].name))
             else:
                 actions.append(_t("product_not_found", lang, name=product_name))
@@ -196,6 +205,8 @@ async def upload_audio(
             else:
                 actions.append(_t("product_not_found", lang, name=product_name))
 
+    notify_clients("progress:3")
+    notify_clients("progress:4")
     context = (
         f"Input type: voice note. "
         f"Transcription: '{intent_result.original_transcription}'. "
@@ -207,12 +218,13 @@ async def upload_audio(
 
     log_repo = AgentLogRepository(conn)
     model_used = get_settings().default_model
-    log_repo.create(
+    log = log_repo.create(
         input_type="voice",
         input_summary=_t("voice_log_summary", lang, text=intent_result.original_transcription[:80]),
         reasoning=reasoning,
         actions_taken=actions,
         model_used=model_used,
+        revert_data=revert_data,
     )
     conn.commit()
     notify_clients("update")
@@ -223,4 +235,6 @@ async def upload_audio(
         reasoning=reasoning,
         alerts_created=alerts_created,
         model_used=model_used,
+        log_id=log.id,
+        revert_data=revert_data,
     )

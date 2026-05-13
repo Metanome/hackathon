@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS agent_logs (
     reasoning     TEXT    NOT NULL,
     actions_taken TEXT    NOT NULL DEFAULT '[]',
     model_used    TEXT    NOT NULL,
+    revert_data   TEXT    DEFAULT NULL,
     created_at    DATETIME NOT NULL DEFAULT (datetime('now'))
 );
 """

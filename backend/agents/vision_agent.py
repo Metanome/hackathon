@@ -11,7 +11,8 @@ from schemas.agent import OrderExtractionResult, ShelfScanResult, UploadResult
 from schemas.alert import AlertCreate
 from schemas.order import OrderCreate
 from schemas.product import ProductCreate
-from services.alert_service import sync_alert
+from services.alert_service import sync_alert_tracked
+from services.event_service import notify_clients
 from services.gemini_service import generate_from_image
 
 
@@ -31,9 +32,11 @@ def process_order_slip(
 
     raw = generate_from_image(image_bytes, mime_type, ORDER_EXTRACTION_PROMPT)
     extraction = OrderExtractionResult(**raw)
+    notify_clients("progress:3")
 
     actions: list[str] = []
     order_items: list[dict] = []
+    revert_data: dict = {"orders_created": [], "products_created": [], "alerts_created": []}
 
     for item in extraction.items:
         matches = product_repo.search_by_name(item.product_name)
@@ -46,32 +49,35 @@ def process_order_slip(
                 unit=item.unit or "pcs",
             ))
             product = new_prod
-            
-            alert_repo.create(AlertCreate(
+            revert_data["products_created"].append(new_prod.id)
+            alert = alert_repo.create(AlertCreate(
                 type="setup_required",
                 product_id=new_prod.id,
                 message=_t("setup_required_message_order", lang, name=item.product_name)
             ))
+            revert_data["alerts_created"].append(alert.id)
             actions.append(_t("auto_created_product", lang, name=item.product_name))
         else:
             product = matches[0]
 
         order_items.append({"product_id": product.id, "quantity": item.quantity})
-        sync_alert(conn, product.id)
+        sync_alert_tracked(conn, product.id, revert_data)
         actions.append(_t("alert_synced", lang, name=product.name))
 
     if order_items:
-        order_repo.create(OrderCreate(
+        order = order_repo.create(OrderCreate(
             customer_name=extraction.customer_name,
             source="image_order",
             items=order_items,
         ))
+        revert_data["orders_created"].append(order.id)
         actions.append(_t("order_created_customer", lang, customer=extraction.customer_name))
 
+    notify_clients("progress:4")
     context = (
         f"Input type: handwritten order slip. "
         f"Customer: {extraction.customer_name}. "
-        f"Items extracted: {[f'{i.quantity}× {i.product_name}' for i in extraction.items]}. "
+        f"Items extracted: {[f'{i.quantity}\u00d7 {i.product_name}' for i in extraction.items]}. "
         f"Actions taken: {actions}. "
         f"Notes: {extraction.notes or 'none'}."
     )
@@ -84,6 +90,7 @@ def process_order_slip(
         reasoning=reasoning,
         alerts_created=alerts_created,
         model_used=get_settings().default_model,
+        revert_data=revert_data,
     )
 
 
@@ -101,8 +108,10 @@ def process_shelf_scan(
 
     raw = generate_from_image(image_bytes, mime_type, SHELF_SCAN_PROMPT)
     scan = ShelfScanResult(**raw)
+    notify_clients("progress:3")
 
     actions: list[str] = []
+    revert_data: dict = {"alerts_created": []}
 
     for detected in scan.products_detected:
         if detected.status == "adequate":
@@ -113,7 +122,7 @@ def process_shelf_scan(
         product_display = matches[0].name if matches else detected.name
 
         if product_id:
-            sync_alert(conn, product_id)
+            sync_alert_tracked(conn, product_id, revert_data)
             actions.append(_t("shelf_alert_synced", lang, name=product_display))
         else:
             existing = conn.execute(
@@ -121,15 +130,17 @@ def process_shelf_scan(
                 (f"%'{detected.name}'%",),
             ).fetchone()
             if not existing:
-                alert_repo.create(AlertCreate(
+                alert = alert_repo.create(AlertCreate(
                     type="critical_stock" if detected.status == "critical" else "low_stock",
                     product_id=None,
                     message=_t("shelf_unknown_alert_message", lang, name=detected.name, status=detected.status),
                 ))
+                revert_data["alerts_created"].append(alert.id)
                 actions.append(_t("shelf_unknown_action", lang, name=detected.name, status=detected.status))
             else:
                 actions.append(_t("shelf_existing_alert", lang, name=detected.name))
 
+    notify_clients("progress:4")
     context = (
         f"Input type: shelf scan. "
         f"Overall shelf status: {scan.overall_status}. "
@@ -145,4 +156,5 @@ def process_shelf_scan(
         reasoning=reasoning,
         alerts_created=len([a for a in actions if "Alert" in a]),
         model_used=get_settings().default_model,
+        revert_data=revert_data,
     )

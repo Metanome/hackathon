@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from config import get_settings
 from services.gemini_service import clear_client_cache, list_models
@@ -11,6 +11,7 @@ from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
 from repositories.product_repository import ProductRepository
 from schemas.agent import AgentActionLog
+from services.event_service import notify_clients
 from schemas.settings import SettingsResponse, SettingsUpdate, ProfileResponse, ProfileUpdate
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
@@ -124,3 +125,40 @@ def get_agent_logs(
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> list[AgentActionLog]:
     return AgentLogRepository(conn).get_recent(limit=limit)
+
+
+@router.post("/agent-logs/{log_id}/revert")
+def revert_agent_log(
+    log_id: int,
+    conn: sqlite3.Connection = Depends(db_dependency),
+) -> dict:
+    log = AgentLogRepository(conn).get_by_id(log_id)
+    if not log:
+        raise HTTPException(status_code=404, detail="ERR_LOG_NOT_FOUND")
+    if not log.revert_data:
+        raise HTTPException(status_code=422, detail="ERR_NO_REVERT_DATA")
+
+    rd = log.revert_data
+    for order_id in rd.get("orders_created", []):
+        conn.execute("DELETE FROM order_items WHERE order_id = ?", (order_id,))
+        conn.execute("DELETE FROM orders WHERE id = ?", (order_id,))
+    for product_id in rd.get("products_created", []):
+        conn.execute("DELETE FROM alerts WHERE product_id = ?", (product_id,))
+        conn.execute("DELETE FROM order_items WHERE product_id = ?", (product_id,))
+        conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+    for alert_id in rd.get("alerts_created", []):
+        conn.execute("UPDATE alerts SET resolved = 1 WHERE id = ?", (alert_id,))
+    for alert_id in rd.get("alerts_resolved", []):
+        conn.execute("UPDATE alerts SET resolved = 0 WHERE id = ?", (alert_id,))
+    for entry in rd.get("alerts_updated", []):
+        conn.execute(
+            "UPDATE alerts SET type = ?, message = ?, draft_email = ? WHERE id = ?",
+            (entry["type"], entry["message"], entry["draft_email"], entry["id"]),
+        )
+    for change in rd.get("stock_changes", []):
+        conn.execute("UPDATE products SET stock_quantity = ? WHERE id = ?",
+                     (change["old_qty"], change["product_id"]))
+
+    conn.commit()
+    notify_clients("update")
+    return {"status": "reverted"}

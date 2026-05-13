@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { uploadImage, uploadAudio } from '../api/upload'
+import { revertAgentLog } from '../api/dashboard'
 import AgentThinking from '../components/AgentThinking'
 import ReasoningPanel from '../components/ReasoningPanel'
-import { ImageIcon, MicIcon, RotateCcwIcon, UploadIcon } from '../components/Icons'
+import { ImageIcon, MicIcon, RotateCcwIcon, UploadIcon, XIcon } from '../components/Icons'
 import { useTheme } from '../providers/ThemeProvider'
+import { useSSE } from '../providers/SSEProvider'
 import { T } from '../constants'
 
 const ACCEPTED_IMAGE = 'image/jpeg,image/png,image/webp'
@@ -155,29 +157,61 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
 export default function Upload() {
   const { lang } = useTheme()
   const t = T[lang]
+  const { uploadStep } = useSSE()
   const [thinking, setThinking] = useState(false)
   const [thinkStep, setThinkStep] = useState(0)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [reverting, setReverting] = useState(false)
+  const [cancelRequested, setCancelRequested] = useState(false)
+  const cancelRef = useRef(false)
+
+  const requestCancel = useCallback(() => {
+    cancelRef.current = true
+    setCancelRequested(true)
+  }, [])
+
+  useEffect(() => {
+    if (thinking) setThinkStep(uploadStep)
+  }, [uploadStep, thinking])
 
   const process = useCallback(async (file, uploadFn) => {
     setResult(null)
     setError(null)
     setThinking(true)
     setThinkStep(0)
-    const steps = [1, 2, 3, 4]
-    const timers = steps.map((s, i) => setTimeout(() => setThinkStep(s), (i + 1) * 1800))
+    cancelRef.current = false
+    setCancelRequested(false)
     try {
       const data = await uploadFn(file, lang)
-      steps.forEach((_, i) => clearTimeout(timers[i]))
-      setResult(data)
+      if (cancelRef.current && data.log_id) {
+        setReverting(true)
+        try { await revertAgentLog(data.log_id) } catch {}
+        setReverting(false)
+      } else {
+        setResult(data)
+      }
     } catch (e) {
-      steps.forEach((_, i) => clearTimeout(timers[i]))
       setError(e.response?.data?.detail || e.message || t.uploadFailed)
     } finally {
       setThinking(false)
+      cancelRef.current = false
+      setCancelRequested(false)
     }
   }, [lang])
+
+  const handleCancel = useCallback(async () => {
+    if (!result?.log_id) return
+    setReverting(true)
+    try {
+      await revertAgentLog(result.log_id)
+      setResult(null)
+    } catch (e) {
+      setError(e.response?.data?.detail || e.message || t.uploadFailed)
+    } finally {
+      setReverting(false)
+    }
+  }, [result, t])
 
   return (
     <div className="space-y-8">
@@ -198,7 +232,22 @@ export default function Upload() {
         </div>
       )}
 
-      {thinking && <AgentThinking step={thinkStep} />}
+      {(thinking || reverting) && (
+        <div className="space-y-4">
+          <AgentThinking step={thinkStep} />
+          {thinking && !cancelRequested && (
+            <div className="flex justify-center">
+              <button onClick={requestCancel} className="btn-ghost flex items-center gap-2 text-sm px-4 py-2"
+                style={{ color: 'var(--danger)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)' }}>
+                <XIcon size={14} /> {t.cancel}
+              </button>
+            </div>
+          )}
+          {(reverting || cancelRequested) && (
+            <p className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>{t.loading}</p>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="card" style={{ borderColor: 'color-mix(in srgb, var(--danger) 40%, transparent)', background: 'color-mix(in srgb, var(--danger) 5%, transparent)' }}>
@@ -216,9 +265,22 @@ export default function Upload() {
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} {t.alertsCreated} · {t.modelLabel}: {result.model_used}</p>
           </div>
           <ReasoningPanel reasoning={result.reasoning} actions={result.actions_taken} model={result.model_used} />
-          <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setResult(null)}>
-            <UploadIcon size={16} /> {t.uploadAnother}
-          </button>
+          <div className="flex gap-3">
+            <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={() => setResult(null)}>
+              <UploadIcon size={16} /> {t.uploadAnother}
+            </button>
+            {result.log_id && (
+              <button
+                onClick={handleCancel}
+                disabled={reverting}
+                className="btn-ghost flex items-center gap-2 px-4 disabled:opacity-50"
+                style={{ color: 'var(--danger)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)' }}
+              >
+                <XIcon size={14} />
+                {reverting ? t.loading : t.cancelAiChanges}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

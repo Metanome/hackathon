@@ -4,6 +4,7 @@ const SSEContext = createContext()
 
 export function SSEProvider({ children }) {
   const [lastUpdate, setLastUpdate] = useState(Date.now())
+  const [uploadStep, setUploadStep] = useState(0)
 
   useEffect(() => {
     // Determine the API base URL for the SSE connection
@@ -16,8 +17,10 @@ export function SSEProvider({ children }) {
 
     eventSource.onmessage = (event) => {
       if (event.data === 'update') {
-        console.log('[SSE] Received invalidation event from backend')
         setLastUpdate(Date.now())
+      } else if (event.data?.startsWith('progress:')) {
+        const step = parseInt(event.data.split(':')[1], 10)
+        if (!isNaN(step)) setUploadStep(step)
       }
     }
 
@@ -32,7 +35,7 @@ export function SSEProvider({ children }) {
   }, [])
 
   return (
-    <SSEContext.Provider value={{ lastUpdate }}>
+    <SSEContext.Provider value={{ lastUpdate, uploadStep }}>
       {children}
     </SSEContext.Provider>
   )

@@ -53,6 +53,7 @@ class AgentActionLog(BaseModel):
     reasoning: str
     actions_taken: list[str]
     model_used: str
+    revert_data: dict | None = None
     created_at: datetime
 
 
@@ -64,3 +65,5 @@ class UploadResult(BaseModel):
     reasoning: str
     alerts_created: int
     model_used: str
+    log_id: int | None = None
+    revert_data: dict | None = None

@@ -56,6 +56,40 @@ def sync_alert(conn: sqlite3.Connection, product_id: int):
             draft_email=draft_email
         ))
 
+def sync_alert_tracked(conn: sqlite3.Connection, product_id: int, revert_data: dict) -> None:
+    """
+    Call sync_alert and record what changed (created/resolved/updated alerts) into revert_data.
+    """
+    existing = conn.execute(
+        "SELECT id, type, message, draft_email, resolved FROM alerts WHERE product_id = ? AND resolved = 0",
+        (product_id,)
+    ).fetchone()
+    existing_id = existing["id"] if existing else None
+
+    sync_alert(conn, product_id)
+
+    if existing_id is None:
+        new_row = conn.execute(
+            "SELECT id FROM alerts WHERE product_id = ? AND resolved = 0 ORDER BY id DESC LIMIT 1",
+            (product_id,)
+        ).fetchone()
+        if new_row:
+            revert_data.setdefault("alerts_created", []).append(new_row["id"])
+    else:
+        after = conn.execute(
+            "SELECT type, message, draft_email, resolved FROM alerts WHERE id = ?", (existing_id,)
+        ).fetchone()
+        if after["resolved"]:
+            revert_data.setdefault("alerts_resolved", []).append(existing_id)
+        elif after["type"] != existing["type"] or after["message"] != existing["message"] or after["draft_email"] != existing["draft_email"]:
+            revert_data.setdefault("alerts_updated", []).append({
+                "id": existing_id,
+                "type": existing["type"],
+                "message": existing["message"],
+                "draft_email": existing["draft_email"],
+            })
+
+
 def check_and_alert_stock(product_id: int):
     """
     FastAPI BackgroundTask wrapper for sync_alert.
