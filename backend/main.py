@@ -10,6 +10,9 @@ from config import get_settings
 from database import init_db
 from routers import alerts, events, inventory, orders, settings, upload
 from services.event_service import set_event_loop, shutdown as shutdown_events
+from services.gemini_service import APIKeyMissingError
+from i18n import t as _t
+import sqlite3
 
 logging.basicConfig(
     filename='backend.log',
@@ -32,6 +35,18 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(APIKeyMissingError)
+async def api_key_missing_handler(request: Request, exc: APIKeyMissingError):
+    try:
+        conn = sqlite3.connect(get_settings().database_path)
+        row = conn.execute("SELECT language_preference FROM profile WHERE id = 1").fetchone()
+        lang = row[0] if row else "en"
+        conn.close()
+    except Exception:
+        lang = "en"
+    return JSONResponse(status_code=503, content={"detail": _t("api_key_missing", lang)})
 
 
 @app.exception_handler(Exception)

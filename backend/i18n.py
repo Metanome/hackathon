@@ -89,6 +89,10 @@ _STRINGS: dict[str, dict[str, str]] = {
         "en": "Voice note: '{text}'",
         "tr": "Sesli not: '{text}'",
     },
+    "api_key_missing": {
+        "en": "Gemini API key is not configured. Please set it in Settings.",
+        "tr": "Gemini API anahtarı yapılandırılmamış. Lütfen Ayarlar'dan ekleyin.",
+    },
 }
 
 

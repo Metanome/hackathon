@@ -9,6 +9,11 @@ from google.genai import types
 from google.genai.errors import ClientError, ServerError
 
 from config import get_settings
+from i18n import t as _t
+
+
+class APIKeyMissingError(Exception):
+    """Raised when GEMINI_API_KEY is not configured."""
 
 
 def _with_retry(fn, *args, max_retries: int = 2, **kwargs):
@@ -25,7 +30,10 @@ def _with_retry(fn, *args, max_retries: int = 2, **kwargs):
 
 @lru_cache(maxsize=1)
 def _get_client() -> genai.Client:
-    return genai.Client(api_key=get_settings().gemini_api_key)
+    key = get_settings().gemini_api_key
+    if not key:
+        raise APIKeyMissingError()
+    return genai.Client(api_key=key)
 
 
 def _get_model() -> str:
