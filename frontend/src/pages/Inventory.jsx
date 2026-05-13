@@ -23,14 +23,14 @@ export default function Inventory() {
   const [editCategory, setEditCategory] = useState('')
   const [editPrice, setEditPrice] = useState('')
   const [editThreshold, setEditThreshold] = useState('')
-  const [editUnit, setEditUnit] = useState('adet')
+  const [editUnit, setEditUnit] = useState('pcs')
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(1)
   const toast = useToast()
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [newProduct, setNewProduct] = useState({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'adet', supplierName: '', supplierEmail: '' })
+  const [newProduct, setNewProduct] = useState({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'pcs', supplierName: '', supplierEmail: '' })
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -103,7 +103,7 @@ export default function Inventory() {
               }
             }}
           />
-          <button onClick={() => { setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'adet', supplierName: '', supplierEmail: '' }); setShowModal(true) }}
+          <button onClick={() => { setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'pcs', supplierName: '', supplierEmail: '' }); setShowModal(true) }}
             className="btn-primary flex items-center gap-2">
             <PlusIcon size={16} />
             {t.addProduct}
@@ -117,7 +117,7 @@ export default function Inventory() {
           title={q ? t.noSearchResults : t.noProducts}
           description={q ? t.noSearchResultsDesc : t.noProductsDesc}
           action={!q && (
-            <button onClick={() => { setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'adet', supplierName: '', supplierEmail: '' }); setShowModal(true) }}
+            <button onClick={() => { setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'pcs', supplierName: '', supplierEmail: '' }); setShowModal(true) }}
               className="btn-primary flex items-center gap-2">
               <PlusIcon size={16} />{t.addProduct}
             </button>
@@ -129,8 +129,8 @@ export default function Inventory() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                {[t.product, t.sku, t.category, t.unit, t.price, t.stock, t.threshold, t.status, ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                {[t.product, t.sku, t.category, t.unit, t.price, t.stock, t.threshold, t.status, ''].map((h, i) => (
+                  <th key={h} className={`text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide ${i === 1 || i === 6 ? 'hidden sm:table-cell' : ''}`} style={{ color: 'var(--text-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -140,25 +140,25 @@ export default function Inventory() {
                   onMouseEnter={e => e.currentTarget.style.background = 'color-mix(in srgb, var(--accent) 5%, transparent)'}
                   onMouseLeave={e => e.currentTarget.style.background = ''}>
                   <td className="px-4 py-3 font-medium" style={{ color: 'var(--accent)' }}>{p.name}</td>
-                  <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--text-muted)' }}>{p.sku}</td>
+                  <td className="px-4 py-3 font-mono text-xs hidden sm:table-cell" style={{ color: 'var(--text-muted)' }}>{p.sku}</td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
-                    {editId === p.id ? <input type="text" value={editCategory} onChange={e => setEditCategory(e.target.value)} className="input w-24 py-1 text-sm" /> : p.category}
+                    {editId === p.id ? <input type="text" value={editCategory} onChange={e => setEditCategory(e.target.value)} className="input w-full py-1 text-sm" /> : p.category}
                   </td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
                     {editId === p.id
-                      ? <select value={editUnit} onChange={e => setEditUnit(e.target.value)} className="input w-20 py-1 text-sm">
+                      ? <select value={editUnit} onChange={e => setEditUnit(e.target.value)} className="input w-full py-1 text-sm">
                           {UNITS.map(u => <option key={u} value={u}>{t.unitLabels[u] ?? u}</option>)}
                         </select>
                       : <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{t.unitLabels[p.unit] ?? p.unit}</span>}
                   </td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
-                    {editId === p.id ? <input type="number" step="0.01" min="0" value={editPrice} onChange={e => setEditPrice(e.target.value)} className="input w-16 py-1 text-sm" /> : `${import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}${p.unit_price.toFixed(2)}`}
+                    {editId === p.id ? <input type="number" step="0.01" min="0" value={editPrice} onChange={e => setEditPrice(e.target.value)} className="input w-full py-1 text-sm" /> : `${import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}${p.unit_price.toFixed(2)}`}
                   </td>
                   <td className="px-4 py-3">
-                    {editId === p.id ? <input type="number" min="0" value={editQty} onChange={e => setEditQty(e.target.value)} className="input w-16 text-center py-1 text-sm" /> : <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{p.stock_quantity}</span>}
+                    {editId === p.id ? <input type="number" min="0" value={editQty} onChange={e => setEditQty(e.target.value)} className="input w-full text-center py-1 text-sm" /> : <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{p.stock_quantity}</span>}
                   </td>
-                  <td className="px-4 py-3">
-                    {editId === p.id ? <input type="number" min="0" value={editThreshold} onChange={e => setEditThreshold(e.target.value)} className="input w-16 text-center py-1 text-sm" /> : <span style={{ color: 'var(--text-muted)' }}>{p.reorder_threshold}</span>}
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    {editId === p.id ? <input type="number" min="0" value={editThreshold} onChange={e => setEditThreshold(e.target.value)} className="input w-full text-center py-1 text-sm" /> : <span style={{ color: 'var(--text-muted)' }}>{p.reorder_threshold}</span>}
                   </td>
                   <td className="px-4 py-3"><StockBadge status={p.status} /></td>
                   <td className="px-4 py-3 text-right">
@@ -173,11 +173,11 @@ export default function Inventory() {
                       </div>
                     ) : (
                       <div className="flex gap-1 justify-end">
-                        <button onClick={() => { setEditId(p.id); setEditQty(String(p.stock_quantity)); setEditCategory(p.category); setEditPrice(String(p.unit_price)); setEditThreshold(String(p.reorder_threshold)); setEditUnit(p.unit || 'adet') }}
+                        <button onClick={() => { setEditId(p.id); setEditQty(String(p.stock_quantity)); setEditCategory(p.category); setEditPrice(String(p.unit_price)); setEditThreshold(String(p.reorder_threshold)); setEditUnit(p.unit || 'pcs') }}
                           className="p-1.5 rounded transition-colors" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                           <EditIcon />
                         </button>
-                        <button onClick={() => { setNewProduct({ id: p.id, name: p.name, category: p.category, price: String(p.unit_price), stock: String(p.stock_quantity), threshold: String(p.reorder_threshold), unit: p.unit || 'adet', supplierName: p.supplier_name || '', supplierEmail: p.supplier_email || '' }); setShowModal(true) }}
+                        <button onClick={() => { setNewProduct({ id: p.id, name: p.name, category: p.category, price: String(p.unit_price), stock: String(p.stock_quantity), threshold: String(p.reorder_threshold), unit: p.unit || 'pcs', supplierName: p.supplier_name || '', supplierEmail: p.supplier_email || '' }); setShowModal(true) }}
                           className="p-1.5 rounded transition-colors" style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)' }}>
                           <SettingsIcon />
                         </button>
@@ -244,12 +244,12 @@ export default function Inventory() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.productName}</label>
-                <input type="text" className="input" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder="ör. Premium Kahve" />
+                <input type="text" className="input" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder={t.phProductName} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.category}</label>
-                  <input type="text" className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} placeholder="ör. İçecekler" />
+                  <input type="text" className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} placeholder={t.phCategory} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.unit}</label>
@@ -275,11 +275,11 @@ export default function Inventory() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.supplierName}</label>
-                  <input type="text" className="input" value={newProduct.supplierName} onChange={e => setNewProduct({...newProduct, supplierName: e.target.value})} placeholder="ör. Anadolu Tarım" />
+                  <input type="text" className="input" value={newProduct.supplierName} onChange={e => setNewProduct({...newProduct, supplierName: e.target.value})} placeholder={t.phSupplierName} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t.supplierEmail}</label>
-                  <input type="email" className="input" value={newProduct.supplierEmail} onChange={e => setNewProduct({...newProduct, supplierEmail: e.target.value})} placeholder="iletisim@anadolu.com" />
+                  <input type="email" className="input" value={newProduct.supplierEmail} onChange={e => setNewProduct({...newProduct, supplierEmail: e.target.value})} placeholder={t.phSupplierEmail} />
                 </div>
               </div>
             </div>
@@ -289,11 +289,11 @@ export default function Inventory() {
                 if (!newProduct.name) return toast(t.nameRequired, 'warning')
                 setSaving(true)
                 try {
-                  const payload = { name: newProduct.name, category: newProduct.category || t.defaultCategory, unit_price: parseFloat(newProduct.price || 0), stock_quantity: parseInt(newProduct.stock || 0, 10), reorder_threshold: parseInt(newProduct.threshold || 10, 10), unit: newProduct.unit || 'adet', supplier_name: newProduct.supplierName || '', supplier_email: newProduct.supplierEmail || '' }
+                  const payload = { name: newProduct.name, category: newProduct.category || t.defaultCategory, unit_price: parseFloat(newProduct.price || 0), stock_quantity: parseInt(newProduct.stock || 0, 10), reorder_threshold: parseInt(newProduct.threshold || 10, 10), unit: newProduct.unit || 'pcs', supplier_name: newProduct.supplierName || '', supplier_email: newProduct.supplierEmail || '' }
                   if (newProduct.id) { await patch(newProduct.id, payload); toast(t.productUpdated, 'success') }
                   else { await create(payload); toast(t.productAdded, 'success') }
                   setShowModal(false)
-                  setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'adet', supplierName: '', supplierEmail: '' })
+                  setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', unit: 'pcs', supplierName: '', supplierEmail: '' })
                 } catch (e) { toast(e.response?.data?.detail || t.productSaveFailed, 'error') }
                 setSaving(false)
               }} disabled={saving || !newProduct.name} className="btn-primary">

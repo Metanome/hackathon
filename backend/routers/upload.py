@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, UploadFile, File
 from google.genai.errors import ServerError
 
 from agents import classifier_agent, vision_agent, voice_agent
@@ -15,7 +15,6 @@ from schemas.alert import AlertCreate
 from schemas.order import OrderCreate
 from schemas.product import ProductCreate
 from config import get_settings
-from fastapi import BackgroundTasks
 from i18n import t as _t
 from services.alert_service import check_and_alert_stock
 from services.event_service import notify_clients

@@ -3,12 +3,12 @@ import { useState, useRef, useEffect } from 'react'
 import { ROUTES, T } from '../constants'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTheme } from '../providers/ThemeProvider'
-import { BellIcon, MenuIcon, PlusIcon, SearchIcon, XIcon } from './Icons'
+import { BellIcon, GlobeIcon, MenuIcon, MoonIcon, PlusIcon, SearchIcon, SunIcon, XIcon } from './Icons'
 import UserMenu from './UserMenu'
 
 export default function Header({ onMenuClick }) {
   const { alerts } = useAlerts()
-  const { lang } = useTheme()
+  const { lang, theme, toggleTheme, toggleLang } = useTheme()
   const t = T[lang]
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileSearch, setMobileSearch] = useState(false)
@@ -103,6 +103,22 @@ export default function Header({ onMenuClick }) {
           <PlusIcon size={16} />
           {t.newOrder}
         </Link>
+
+        <button onClick={toggleTheme} title={t.appearance}
+          className="p-1.5 rounded-lg transition-colors hidden sm:flex items-center justify-center"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}>
+          {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+        </button>
+
+        <button onClick={toggleLang} title={t.language}
+          className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-colors"
+          style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border-color)' }}>
+          <GlobeIcon size={13} />{lang.toUpperCase()}
+        </button>
 
         <div className="relative" ref={dropdownRef}>
           <div className="cursor-pointer relative transition-colors" style={{ color: 'var(--text-secondary)' }}

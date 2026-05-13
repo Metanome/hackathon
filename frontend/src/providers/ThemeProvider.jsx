@@ -33,7 +33,11 @@ export function ThemeProvider({ children }) {
     }
   }, [lang])
 
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    if (!document.startViewTransition) { setTheme(next); return }
+    document.startViewTransition(() => setTheme(next))
+  }
   const toggleLang = () => setLang(l => l === 'tr' ? 'en' : 'tr')
   const cycleFontSize = () => setFontSize(f => ({ md: 'lg', lg: 'xl', xl: 'md' }[f]))
 

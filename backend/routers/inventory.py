@@ -65,7 +65,7 @@ async def upload_csv(
                 supplier_name=row.get("supplier_name", ""),
                 supplier_email=row.get("supplier_email", ""),
                 unit_price=float(row.get("unit_price", 0.0)),
-                unit=row.get("unit", "adet")
+                unit=row.get("unit", "pcs")
             )
             created = repo.create(product_data)
             added_count += 1
