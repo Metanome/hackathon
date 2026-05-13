@@ -11,6 +11,35 @@
 
 Developed for the **YZTA 5.0 Hackathon**, it modernizes traditional retail by eliminating manual data entry. Merchants manage inventory, process customer orders, and handle supplier communications through natural voice commands and image recognition of handwritten order slips or storage shelves — all in Turkish or English.
 
+## The Problem
+
+Turkey's small merchants — corner grocery stores, local cooperatives, market stalls — run their businesses on paper. Orders are written by hand, inventory is tracked in notebooks, and supplier communication happens over the phone. This creates a cycle of errors, stockouts, and lost revenue that enterprise software doesn't solve, because it's too expensive, too complex, and built for a different user.
+
+The barrier isn't willingness. It's the interface. Typing product names and quantities into a computer is slower than writing them on a slip of paper. Merchants don't adopt digital tools because digital tools don't adapt to how they already work.
+
+## The Solution
+
+Esnaf Tezgahı meets merchants where they are. Instead of forcing a new workflow, it accepts the inputs they already use — a photo of a handwritten order slip, a voice note in Turkish, a quick scan of a storage shelf — and handles everything else automatically.
+
+- A merchant photographs a handwritten order slip → the platform reads it, creates the order, and deducts stock.
+- A merchant records a voice note saying stock arrived → inventory is updated instantly.
+- A merchant photographs a shelf → stock levels are estimated and synced.
+- When stock runs low, automated reorder emails are sent directly to suppliers.
+
+No forms. No typing. No training required. Just the tools they already have — a phone and their own language.
+
+## A Day in the Life
+
+**Mehmet** runs a small grocery cooperative in Ankara. His Tuesday morning looks like this:
+
+1. A delivery arrives. Mehmet takes a photo of the storage shelf with his phone and uploads it. Esnaf Tezgahı scans the image, identifies each product, estimates quantities, and updates his inventory — in seconds.
+
+2. A regular customer calls in an order. Mehmet records a quick voice note in Turkish: *"Ahmet Bey'e 3 kilo domates, 2 kilo soğan."* The platform transcribes it, matches the items to his product catalog, creates the order, and deducts the stock automatically.
+
+3. At the end of the day, Mehmet's dashboard shows a low-stock alert on olive oil. Esnaf Tezgahı has already drafted and sent a reorder email to his supplier.
+
+Mehmet never opened a spreadsheet. He never typed a product name. He just ran his store.
+
 ## Key Features
 
 ### 1. Multimodal AI Input

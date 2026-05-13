@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from database import init_db
 from routers import alerts, events, inventory, orders, settings, upload
-from services.event_service import set_event_loop
+from services.event_service import set_event_loop, shutdown as shutdown_events
 
 logging.basicConfig(
     filename='backend.log',
@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
     init_db()
     set_event_loop(asyncio.get_running_loop())
     yield
+    shutdown_events()
 
 
 app = FastAPI(

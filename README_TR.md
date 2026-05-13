@@ -11,6 +11,35 @@
 
 **YZTA 5.0 Hackathon** kapsamında geliştirilen bu proje, manuel veri girişini ortadan kaldırarak geleneksel perakende işlemlerini modernize eder. Esnaflar; sesli komutlar, el yazısı sipariş fişlerinin ve depo raflarının fotoğrafları aracılığıyla stok yönetimi, sipariş işleme ve tedarikçi iletişimini — Türkçe veya İngilizce — tamamen otomatik olarak gerçekleştirebilir.
 
+## Sorun
+
+Türkiye'nin küçük esnafı — bakkallar, yerel kooperatifler, pazar tezgahları — işlerini kağıt üzerinde yürütüyor. Siparişler elle yazılıyor, stok defterlerde takip ediliyor, tedarikçi iletişimi telefonla kuruluyor. Bu durum; kurumsal yazılımların çözemediği bir hata, stok tükenmesi ve gelir kaybı döngüsü yaratıyor — çünkü o yazılımlar çok pahalı, çok karmaşık ve farklı bir kullanıcı için tasarlanmış.
+
+Engel isteksizlik değil. Engel arayüz. Bilgisayara ürün adı ve miktar yazmak, kağıda yazmaktan daha yavaş. Esnaf dijital araçları benimsemiyor çünkü dijital araçlar onların çalışma biçimine uyum sağlamıyor.
+
+## Çözüm
+
+Esnaf Tezgahı, esnaflara bulundukları yerde kavuşuyor. Yeni bir iş akışı dayatmak yerine, zaten kullandıkları girdileri kabul ediyor — el yazısı sipariş fişinin fotoğrafı, Türkçe sesli not, depo rafının hızlı taraması — ve geri kalanını otomatik olarak hallediyor.
+
+- Esnaf el yazısı sipariş fişini fotoğraflıyor → platform okuyor, siparişi oluşturuyor ve stoğu düşüyor.
+- Esnaf mal geldi diye sesli not kaydediyor → envanter anında güncelleniyor.
+- Esnaf rafı fotoğraflıyor → stok seviyeleri tahmin ediliyor ve sisteme işleniyor.
+- Stok azaldığında otomatik yeniden sipariş e-postası tedarikçiye gönderiliyor.
+
+Form yok. Yazma yok. Eğitim gerekmez. Sadece zaten ellerinde olan araçlar — bir telefon ve kendi dilleri.
+
+## Günlük Hayattan Bir Senaryo
+
+**Mehmet Bey**, Ankara'da küçük bir bakkal kooperatifi işletiyor. Salı sabahı şöyle geçiyor:
+
+1. Mal teslimatı geliyor. Mehmet Bey telefonu ile depo rafının fotoğrafını çekip yüklüyor. Esnaf Tezgahı görüntüyü tarayarak her ürünü tanımlıyor, miktarları tahmin ediyor ve envanteri saniyeler içinde güncelliyor.
+
+2. Tanıdık bir müşteri sipariş veriyor. Mehmet Bey Türkçe kısa bir sesli not kaydediyor: *"Ahmet Bey'e 3 kilo domates, 2 kilo soğan."* Platform sesi yazıya döküyor, kalemleri ürün kataloğuyla eşleştiriyor, siparişi oluşturuyor ve stoğu otomatik olarak düşüyor.
+
+3. Günün sonunda Mehmet Bey'in paneli zeytinyağında düşük stok uyarısı gösteriyor. Esnaf Tezgahı tedarikçisine yeniden sipariş e-postasını çoktan göndermiş bile.
+
+Mehmet Bey hiç elektronik tablo açmadı. Hiçbir ürün adı yazmadı. Sadece dükkanını işletti.
+
 ## Temel Özellikler
 
 ### 1. Çok Modlu Yapay Zeka Girişi

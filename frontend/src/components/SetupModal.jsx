@@ -22,7 +22,7 @@ export default function SetupModal() {
     if (!valid || saving) return
     setSaving(true)
     try {
-      await saveProfile({ display_name: displayName.trim(), store_name: storeName.trim() })
+      await saveProfile({ display_name: displayName.trim(), store_name: storeName.trim(), language_preference: lang })
     } finally {
       setSaving(false)
     }

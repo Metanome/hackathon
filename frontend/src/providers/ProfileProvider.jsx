@@ -12,17 +12,30 @@ export function ProfileProvider({ children }) {
   const initDone = useRef(false)
 
   useEffect(() => {
-    getProfile()
-      .then(data => {
-        setProfile(data)
-        if (!initDone.current && data.language_preference) {
-          setLang(data.language_preference)
-          initDone.current = true
-        }
-        if (!data.display_name || !data.store_name) setNeedsSetup(true)
-      })
-      .catch(() => setNeedsSetup(true))
-      .finally(() => setLoading(false))
+    let retryId = null
+    const load = () => {
+      getProfile()
+        .then(data => {
+          setProfile(data)
+          if (!initDone.current && data.language_preference) {
+            setLang(data.language_preference)
+            initDone.current = true
+          }
+          if (!data.display_name || !data.store_name) setNeedsSetup(true)
+          setLoading(false)
+        })
+        .catch((err) => {
+          if (err.response) {
+            setNeedsSetup(true)
+            setLoading(false)
+          } else {
+            setLoading(false)
+            retryId = setTimeout(load, 5000)
+          }
+        })
+    }
+    load()
+    return () => clearTimeout(retryId)
   }, [setLang])
 
   const saveProfile = async (data) => {

@@ -24,7 +24,7 @@ export default function Footer() {
       }
     }
     check()
-    const id = setInterval(check, 30000)
+    const id = setInterval(check, 10000)
     return () => { cancelled = true; clearInterval(id) }
   }, [])
 
@@ -47,9 +47,15 @@ export default function Footer() {
         <div className="flex items-center gap-3" style={{ color: 'var(--text-muted)' }}>
           {online !== null && (
             <span className="flex items-center gap-1">
-              <span style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block',
-                background: online ? '#22c55e' : '#ef4444',
-                boxShadow: online ? '0 0 6px #22c55e88' : '0 0 6px #ef444488' }} />
+              <span className="relative flex h-2.5 w-2.5">
+                {online && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50"
+                    style={{ background: '#22c55e' }} />
+                )}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${!online ? 'animate-pulse' : ''}`}
+                  style={{ background: online ? '#22c55e' : '#ef4444',
+                    boxShadow: online ? '0 0 6px #22c55e88' : '0 0 6px #ef444488' }} />
+              </span>
               <span className="hidden sm:inline">{online ? t.backendOnline : t.backendOffline}</span>
             </span>
           )}

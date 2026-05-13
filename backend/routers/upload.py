@@ -1,3 +1,4 @@
+import asyncio
 import sqlite3
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, UploadFile, File
@@ -44,7 +45,7 @@ async def upload_image(
     image_bytes = await file.read()
 
     try:
-        classification = classifier_agent.classify_image(image_bytes, file.content_type)
+        classification = await asyncio.to_thread(classifier_agent.classify_image, image_bytes, file.content_type)
     except ServerError:
         raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
 
@@ -56,9 +57,9 @@ async def upload_image(
 
     try:
         if classification.type == "order_slip":
-            result = vision_agent.process_order_slip(image_bytes, file.content_type, conn, lang)
+            result = await asyncio.to_thread(vision_agent.process_order_slip, image_bytes, file.content_type, conn, lang)
         else:
-            result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn, lang)
+            result = await asyncio.to_thread(vision_agent.process_shelf_scan, image_bytes, file.content_type, conn, lang)
     except ServerError:
         raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
     except ValueError:
@@ -94,7 +95,7 @@ async def upload_audio(
 
     audio_bytes = await file.read()
     try:
-        intent_result = voice_agent.process_audio(audio_bytes, mime)
+        intent_result = await asyncio.to_thread(voice_agent.process_audio, audio_bytes, mime)
     except ServerError:
         raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
     except ValueError:
@@ -172,7 +173,7 @@ async def upload_audio(
         f"Entities: {intent_result.entities}. "
         f"Actions taken: {actions}."
     )
-    reasoning = synthesize_reasoning(context, lang)
+    reasoning = await asyncio.to_thread(synthesize_reasoning, context, lang)
 
     log_repo = AgentLogRepository(conn)
     model_used = get_settings().default_model
