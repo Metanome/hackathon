@@ -1,3 +1,15 @@
+<p align="center">
+  <span style="display:inline-flex;align-items:center;gap:12px;">
+    <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:#6366f1;">
+      <img src="frontend/src/assets/logo-icon.svg" width="28" height="28" alt="" />
+    </span>
+    <span style="display:inline-flex;flex-direction:column;text-align:left;">
+      <strong style="font-size:1.5rem;line-height:1.2;">Esnaf Tezgahı</strong>
+      <span style="color:#888;font-size:0.85rem;">AI Operations Platform</span>
+    </span>
+  </span>
+</p>
+
 # Esnaf Tezgahı
 
 Esnaf Tezgahı is a multimodal, agentic AI platform engineered for Turkish SMEs, such as local cooperatives, boutique shops, and neighborhood markets. 

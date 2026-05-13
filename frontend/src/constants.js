@@ -154,6 +154,13 @@ export const T = {
     "ERR_AI_PARSE": "Yapay zeka yanıtı işlenemedi.",
     "ERR_NETWORK": "Ağ hatası (Sunucuya ulaşılamıyor)",
     uploadFailed: "Yükleme başarısız",
+    paginationItems: "ürün",
+    paginationPrev: "Önceki",
+    paginationNext: "Sonraki",
+    apiKeyPlaceholder: "API anahtarınızı girin",
+    apiKeySetPlaceholder: "••••••••••••••••••• (ayarlandı)",
+    defaultCategory: "Genel",
+    modelLabel: "Model",
   },
   en: {
     dashboard: "Dashboard",
@@ -299,5 +306,12 @@ export const T = {
     "ERR_AI_PARSE": "Failed to parse AI response.",
     "ERR_NETWORK": "Network Error",
     uploadFailed: "Upload failed",
+    paginationItems: "products",
+    paginationPrev: "Previous",
+    paginationNext: "Next",
+    apiKeyPlaceholder: "Enter your API key",
+    apiKeySetPlaceholder: "••••••••••••••••••• (key is set)",
+    defaultCategory: "General",
+    modelLabel: "Model",
   }
 }

@@ -72,7 +72,7 @@ export default function Dashboard() {
               <div key={log.id} className="card">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="badge badge-source">
-                    {log.input_type.replace('_', ' ').toUpperCase()}
+                    {t.sourceLabels[log.input_type] ?? log.input_type.replace('_', ' ').toUpperCase()}
                   </span>
                   <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>
                     {new Date(log.created_at).toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')}

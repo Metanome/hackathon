@@ -70,7 +70,7 @@ export default function Settings() {
               className="input pr-16"
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
-              placeholder={settings?.api_key_set ? '••••••••••••••••••• (key is set)' : 'API anahtarınızı girin'}
+              placeholder={settings?.api_key_set ? t.apiKeySetPlaceholder : t.apiKeyPlaceholder}
             />
             <button className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
               style={{ color: 'var(--text-muted)' }}

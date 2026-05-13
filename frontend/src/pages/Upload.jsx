@@ -213,7 +213,7 @@ export default function Upload() {
         <div className="space-y-4">
           <div className="card" style={{ borderColor: 'color-mix(in srgb, var(--success) 30%, transparent)', background: 'color-mix(in srgb, var(--success) 5%, transparent)' }}>
             <div className="font-semibold mb-1" style={{ color: 'var(--success)' }}>{t.processingComplete}</div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} {t.alertsCreated} · Model: {result.model_used}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} {t.alertsCreated} · {t.modelLabel}: {result.model_used}</p>
           </div>
           <ReasoningPanel reasoning={result.reasoning} actions={result.actions_taken} model={result.model_used} />
           <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setResult(null)}>

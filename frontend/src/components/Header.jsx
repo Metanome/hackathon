@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ROUTES, T } from '../constants'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTheme } from '../providers/ThemeProvider'
-import { BellIcon, MenuIcon, PlusIcon } from './Icons'
+import { BellIcon, MenuIcon, PlusIcon, SearchIcon, XIcon } from './Icons'
 import UserMenu from './UserMenu'
 
 export default function Header({ onMenuClick }) {
@@ -11,7 +11,9 @@ export default function Header({ onMenuClick }) {
   const { lang } = useTheme()
   const t = T[lang]
   const [showDropdown, setShowDropdown] = useState(false)
+  const [mobileSearch, setMobileSearch] = useState(false)
   const dropdownRef = useRef(null)
+  const mobileInputRef = useRef(null)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
@@ -23,6 +25,10 @@ export default function Header({ onMenuClick }) {
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '')
   }, [searchParams])
+
+  useEffect(() => {
+    if (mobileSearch) mobileInputRef.current?.focus()
+  }, [mobileSearch])
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -41,12 +47,32 @@ export default function Header({ onMenuClick }) {
       } else {
         navigate(ROUTES.INVENTORY)
       }
+      setMobileSearch(false)
     }
   }
 
   return (
     <header style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}
-      className="h-16 backdrop-blur-sm sticky top-0 z-40 flex items-center justify-between px-4 sm:px-8">
+      className="h-16 backdrop-blur-sm sticky top-0 z-40 flex items-center justify-between px-4 sm:px-8 relative overflow-visible">
+
+      {mobileSearch && (
+        <div className="absolute inset-0 flex items-center gap-2 px-4 z-50"
+          style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
+          <input
+            ref={mobileInputRef}
+            type="text"
+            placeholder={t.searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+            className="flex-1 rounded-full px-4 py-1.5 text-sm focus:outline-none"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+          />
+          <button onClick={() => setMobileSearch(false)} style={{ color: 'var(--text-muted)' }}>
+            <XIcon size={18} />
+          </button>
+        </div>
+      )}
       <div className="flex items-center flex-1 max-w-md">
         <button onClick={onMenuClick} className="md:hidden mr-3 shrink-0" style={{ color: 'var(--text-secondary)' }}>
           <MenuIcon size={24} />
@@ -62,7 +88,12 @@ export default function Header({ onMenuClick }) {
         />
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <button className="sm:hidden" onClick={() => setMobileSearch(true)}
+          style={{ color: 'var(--text-secondary)' }}>
+          <SearchIcon size={20} />
+        </button>
+
         <div className="hidden sm:flex flex-col items-end">
           <span className="text-xs font-semibold capitalize" style={{ color: 'var(--accent)' }}>{todayDay}</span>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{todayDate}</span>
@@ -74,7 +105,7 @@ export default function Header({ onMenuClick }) {
         </Link>
 
         <div className="relative" ref={dropdownRef}>
-          <div className="cursor-pointer transition-colors" style={{ color: 'var(--text-secondary)' }}
+          <div className="cursor-pointer relative transition-colors" style={{ color: 'var(--text-secondary)' }}
             onClick={() => setShowDropdown(!showDropdown)}>
             <BellIcon size={20} />
             {alerts.length > 0 && (
@@ -99,13 +130,13 @@ export default function Header({ onMenuClick }) {
                       style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <p className="text-xs leading-snug" style={{ color: 'var(--text-secondary)' }}>{alert.message}</p>
                       <span className="text-[10px] mt-1 block" style={{ color: 'var(--text-muted)' }}>
-                        {alert.type === 'setup_required' ? 'Kurulum Gerekli' : 'Düşük Stok'}
+                        {t.alertTypeLabels[alert.type] ?? alert.type}
                       </span>
                     </div>
                   ))}
                   {alerts.length > 5 && (
                     <div className="px-4 py-2 text-center" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>+{alerts.length - 5} daha</span>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>+{alerts.length - 5} {t.more}</span>
                     </div>
                   )}
                   <div className="p-2">
